@@ -24,11 +24,18 @@ export class CaseComponent implements OnInit {
       this.caseBlanche = this.casesServices.getCaseColor(this.numb-1) === 'white';
       this.piece = this.casesServices.getPiece(this.numb-1);
     }
+    this.casesServices.selectedCase.subscribe((n) => {
+      this.selected = n === this.name;
+    });
   }
 
   clickCase() {
-    //this.casesServices
-    this.selected = !this.selected;
+    if(this.selected) {
+      this.selected = false;
+    }
+    else {
+      this.casesServices.selectCase(this.numb-1);
+    }
   }
 
 }

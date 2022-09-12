@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Piece } from './piece/piece';
 import { PieceComponent } from './piece/piece.component';
+import { Observable, of, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ export class CasesService {
   colorCases: string[] = [];
   pieceCases: (Piece|null)[] = [];
 
-  selectedCase = null; // observable
+  selectedCase = new Subject<string>();
 
   constructor() {
     this.initCases();
@@ -87,6 +88,6 @@ export class CasesService {
   }
 
   selectCase (numb: number) {
-
+    this.selectedCase.next(this.getCaseName(numb));
   }
 }
