@@ -9,10 +9,11 @@ import { Piece } from '../piece/piece'
 })
 export class CaseComponent implements OnInit {
   @Input() numb = 0;
+
+  selected = false;
+
   piece: Piece | null = null;
-
   name = 'null';
-
   caseBlanche = false;
 
   constructor(private casesServices: CasesService) {}
@@ -23,6 +24,11 @@ export class CaseComponent implements OnInit {
       this.caseBlanche = this.casesServices.getCaseColor(this.numb-1) === 'white';
       this.piece = this.casesServices.getPiece(this.numb-1);
     }
+  }
+
+  clickCase() {
+    //this.casesServices
+    this.selected = !this.selected;
   }
 
 }

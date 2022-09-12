@@ -10,6 +10,8 @@ export class CasesService {
   colorCases: string[] = [];
   pieceCases: (Piece|null)[] = [];
 
+  selectedCase = null; // observable
+
   constructor() {
     this.initCases();
     this.initPieces();
@@ -82,5 +84,9 @@ export class CasesService {
 
   getPiece (numb: number) {
     return this.pieceCases[numb];
+  }
+
+  selectCase (numb: number) {
+
   }
 }
