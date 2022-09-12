@@ -1,0 +1,15 @@
+<div class="top-infos">
+    <div *ngFor="let letter of boardRows" class="letter-infos">{{letter.toUpperCase()}}</div>
+</div>
+<div class="df">
+    <div class="left-infos">
+        <div *ngFor="let nb of boardCols" class="nb-infos">{{nb}}</div>
+    </div>
+    <div class="board-div">
+        <div *ngFor="let row of cases" class="row-div">
+            <app-case *ngFor="let j of row" [numb]="j"></app-case>
+        </div>
+    </div>
+</div>
+
+

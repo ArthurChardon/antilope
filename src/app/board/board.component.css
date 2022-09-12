@@ -1,0 +1,37 @@
+.row-div {
+    display: flex;
+}
+
+.top-infos {
+    background-color: blue;
+    color: white;
+    width: calc(8 * 80px);
+    height: 30px;
+    margin-left: 30px;  
+    display: flex;
+}
+
+.nb-infos {
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.left-infos {
+    background-color: red;
+    color: white;
+    width: 30px;
+    height: calc(8 * 80px);
+}
+
+.letter-infos {
+    width: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.df {
+    display: flex;
+}

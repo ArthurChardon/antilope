@@ -1,0 +1,22 @@
+div {
+    width: 80px;
+    height: 80px;
+    background-color: rgb(0,0,169);
+    color: white;
+    &:hover {
+        background-color: navy;
+    }
+}
+
+.blanche {
+    background-color: darkgrey;
+    &:hover {
+        background-color: grey;
+    }
+}
+
+.caseContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
