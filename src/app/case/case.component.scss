@@ -3,16 +3,16 @@ div {
     height: 80px;
     background-color: rgb(11, 57, 84);
     color: white;
-    &:hover {
+    /*&:hover {
         background-color: rgb(42, 88, 115);
-    }
+    }*/
 }
 
 .blanche {
     background-color: rgb(198, 204, 178);
-    &:hover {
+    /*&:hover {
         background-color: rgb(221, 235, 209);
-    }
+    }*/
 }
 
 .caseContainer {
@@ -27,4 +27,8 @@ div {
     border-color: red;
     width: 74px;
     height: 74px;
+}
+
+.available {
+    background-color: red;
 }

@@ -1,4 +1,4 @@
-<div class="caseContainer" [ngClass]="{'blanche' : caseBlanche, 'selected': selected}" (click)="clickCase()">
+<div class="caseContainer" [ngClass]="{'blanche' : caseBlanche, 'selected': selected, 'available': available}" (click)="clickCase()">
     <app-piece *ngIf="piece" [piece]="piece"></app-piece>
 </div>
 

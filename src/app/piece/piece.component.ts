@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { faChessRook, faChessKnight, faChessBishop, faChessQueen, faChessKing, faChessPawn } from '@fortawesome/free-solid-svg-icons';
 import { Piece } from './piece';
 
@@ -7,13 +7,21 @@ import { Piece } from './piece';
   templateUrl: './piece.component.html',
   styleUrls: ['./piece.component.css']
 })
-export class PieceComponent implements OnInit {
+export class PieceComponent implements OnInit, OnChanges {
   @Input() piece: Piece | null = null;
   faPiece = faChessPawn;
 
   constructor() { }
 
   ngOnInit(): void {
+    this.setIcon();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    this.setIcon();
+  }
+
+  setIcon() {
     if (this.piece) {
       if (this.piece.type === 'pawn') {
         this.faPiece = faChessPawn;

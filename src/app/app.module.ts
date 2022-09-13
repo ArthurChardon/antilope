@@ -6,6 +6,14 @@ import { CaseComponent } from './case/case.component';
 import { BoardComponent } from './board/board.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { PieceComponent } from './piece/piece.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
+import { CasesService } from './cases.service';
+
 
 @NgModule({
   declarations: [
@@ -16,9 +24,13 @@ import { PieceComponent } from './piece/piece.component';
   ],
   imports: [
     BrowserModule,
-    FontAwesomeModule
+    FontAwesomeModule,
+    BrowserAnimationsModule,
+    MatCardModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
   ],
-  providers: [],
+  providers: [CasesService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

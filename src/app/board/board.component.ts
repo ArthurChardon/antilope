@@ -19,10 +19,10 @@ export class BoardComponent implements OnInit {
   }
 
   initCases() {
-    for(let i = 1; i < 9; i++) {
+    for(let i = 0; i < 8; i++) {
       this.cases.push([])
-      for (let j = 1; j < 9; j++) {
-        this.cases[i-1].push((i-1)*8+j)
+      for (let j = 0; j < 8; j++) {
+        this.cases[i].push(i*8+j)
       }
     }
 

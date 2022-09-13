@@ -1,1 +1,11 @@
-<fa-icon [icon]="faPiece" size="3x" [ngClass]="{'whitePiece' : piece?.color === 'white', 'blackPiece' : piece?.color === 'black'}"></fa-icon>
+<fa-icon *ngIf="piece?.color === 'black'"
+    [icon]="faPiece" size="4x" 
+    class="blackPiece"
+    [styles]="{'stroke': 'black'}">
+</fa-icon>
+
+<fa-icon *ngIf="piece?.color === 'white'"
+    [icon]="faPiece" size="4x" 
+    class="whitePiece"
+    [styles]="{'stroke': 'black', 'stroke-width': '15px'}">
+</fa-icon>
