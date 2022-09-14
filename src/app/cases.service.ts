@@ -24,6 +24,8 @@ export class CasesService {
   piecesCaptured: Piece[][] = [[],[]];
   _pieceCaptured = new Subject<Piece>();
 
+  possibleMoves: number[] = [];
+
   whiteAttackedCases: number[] = [];
   blackAttackedCases: number[] = [];
   _whiteAttackedCases = new Subject<number[]>();
@@ -127,8 +129,10 @@ export class CasesService {
    }
 
    private setupPiecesCustom() {
-    //this.pieceCases[35] = {type: 'king', color: 'white'};
-    //this.pieceCases[36] = {type: 'queen', color: 'white'};
+    // this.pieceCases[35] = {type: 'king', color: 'white'};
+    // this.pieceCases[12] = {type: 'king', color: 'black'};
+    // //this.pieceCases[35] = {type: 'king', color: 'white'};
+    // this.pieceCases[36] = {type: 'queen', color: 'white'};
    }
 
   getCaseName (numb: number) {
@@ -169,7 +173,7 @@ export class CasesService {
     this.availableCases.next([]);
   }
 
-  pos2_bishop (pos1: number, color: 'white'|'black', cases: (Piece|null)[]) {
+  pos2_bishop (pos1: number, color: 'white'|'black', cases: (Piece|null)[], sim?: boolean) {
 
     var availableMoves: [number,number,string][] = [];
     for(var k of this.moves_bishop) {
@@ -178,7 +182,9 @@ export class CasesService {
         var n = this.tab120[this.tab64[pos1] + (k * j)]
         if(n != -1) { //as we are not out of the board
           if(this.isEmpty(n, cases) || this.hasEnemyPiece(n, color, cases)) {
-            availableMoves.push([pos1, n, '']);
+            if(sim || this.simulatePosition(pos1, n)) {
+              availableMoves.push([pos1, n, '']);
+            }
           }
         }
         else { // outside the board
@@ -193,20 +199,22 @@ export class CasesService {
     return availableMoves;
   }
 
-  pos2_knight (pos1: number, color: 'white'|'black', cases: (Piece|null)[]) {
+  pos2_knight (pos1: number, color: 'white'|'black', cases: (Piece|null)[], sim?: boolean) {
     var availableMoves: [number,number,string][] = [];
     for(var i of this.moves_knight) {
       var n = this.tab120[this.tab64[pos1] + i]
       if(n != -1) { //as we are not out of the board
         if(this.isEmpty(n, cases) || this.hasEnemyPiece(n, color, cases)) {
-          availableMoves.push([pos1, n, '']);
+          if(sim|| this.simulatePosition(pos1, n)) {
+            availableMoves.push([pos1, n, '']);
+          }
         }
       }
     }
     return availableMoves;
   }
 
-  pos2_rook (pos1: number, color: 'white'|'black', cases: (Piece|null)[]) {
+  pos2_rook (pos1: number, color: 'white'|'black', cases: (Piece|null)[], sim?: boolean) {
     var availableMoves: [number,number,string][] = [];
     for(var k of this.moves_rook) {
       var j = 1;
@@ -214,7 +222,9 @@ export class CasesService {
         var n = this.tab120[this.tab64[pos1] + (k * j)]
         if(n != -1) { //as we are not out of the board
           if(this.isEmpty(n, cases) || this.hasEnemyPiece(n, color, cases)) {
-            availableMoves.push([pos1, n, '']);
+            if(sim || this.simulatePosition(pos1, n)) {
+              availableMoves.push([pos1, n, '']);
+            }
           }
         }
         else { // outside the board
@@ -229,7 +239,7 @@ export class CasesService {
     return availableMoves;
   }
 
-  pos2_pawn (pos1: number, color: 'white'|'black', cases: (Piece|null)[]) {
+  pos2_pawn (pos1: number, color: 'white'|'black', cases: (Piece|null)[], sim?: boolean) {
     var availableMoves: [number,number,string][] = [];
     if (color === 'white') {
       var n = this.tab120[this.tab64[pos1]-10];
@@ -245,12 +255,16 @@ export class CasesService {
                         liste.append((pos1,n,'b'))
                     else:
                         liste.append((pos1,n,''))*/
-          availableMoves.push([pos1, n, '']);
+          if(sim || this.simulatePosition(pos1, n)) {
+            availableMoves.push([pos1, n, '']);
+          }
         }
       }
       if(pos1 <=55 && pos1 >= 48) { // first row
         if(this.isEmpty(pos1-8, cases) && this.isEmpty(pos1-16, cases)) {
-          availableMoves.push([pos1, pos1-16, '']);
+          if(sim || this.simulatePosition(pos1, pos1-16)) {
+            availableMoves.push([pos1, pos1-16, '']);
+          }
         }
       }
 
@@ -268,7 +282,9 @@ export class CasesService {
                         liste.append((pos1,n,'b'))
                     else:
                         liste.append((pos1,n,''))*/
-          availableMoves.push([pos1, n, '']);
+            if(sim || this.simulatePosition(pos1, n)) {
+              availableMoves.push([pos1, n, '']);
+            }
         }
       }
       //Capture upper right
@@ -285,7 +301,9 @@ export class CasesService {
                         liste.append((pos1,n,'b'))
                     else:
                         liste.append((pos1,n,''))*/
-          availableMoves.push([pos1, n, '']);
+            if(sim || this.simulatePosition(pos1, n)) {
+              availableMoves.push([pos1, n, '']);
+            }
         }
       }
     }
@@ -303,12 +321,16 @@ export class CasesService {
                         liste.append((pos1,n,'b'))
                     else:
                         liste.append((pos1,n,''))*/
-          availableMoves.push([pos1, n, '']);
+          if(sim || this.simulatePosition(pos1, n)) {
+            availableMoves.push([pos1, n, '']);
+          }
         }
       }
       if(pos1 <=15 && pos1 >= 8) { // first row
         if(this.isEmpty(pos1+8, cases) && this.isEmpty(pos1+16, cases)) {
-          availableMoves.push([pos1, pos1+16, '']);
+          if(sim || this.simulatePosition(pos1, pos1+16)) {
+            availableMoves.push([pos1, pos1+16, '']);
+          }
         }
       }
 
@@ -326,7 +348,9 @@ export class CasesService {
                         liste.append((pos1,n,'b'))
                     else:
                         liste.append((pos1,n,''))*/
-          availableMoves.push([pos1, n, '']);
+          if(sim || this.simulatePosition(pos1, n)) {
+            availableMoves.push([pos1, n, '']);
+          }
         }
       }
       //Capture bottom right
@@ -343,20 +367,24 @@ export class CasesService {
                         liste.append((pos1,n,'b'))
                     else:
                         liste.append((pos1,n,''))*/
-          availableMoves.push([pos1, n, '']);
+          if(sim || this.simulatePosition(pos1, n)) {
+            availableMoves.push([pos1, n, '']);
+          }
         }
       }
     }
     return availableMoves;
   }
 
-  pos2_king (pos1: number, color: 'white'|'black', isAttacked: boolean, cases: (Piece|null)[]) {
+  pos2_king (pos1: number, color: 'white'|'black', isAttacked: boolean, cases: (Piece|null)[], sim?: boolean) {
     var availableMoves: [number,number,string][] = [];
     for(var i of this.moves_rook.concat(this.moves_bishop)) {
       var n = this.tab120[this.tab64[pos1] + i]
       if(n != -1) { //as we are not out of the board
         if(this.isEmpty(n, cases) || this.hasEnemyPiece(n, color, cases)) {
-          availableMoves.push([pos1, n, '']);
+          if(sim || this.simulatePosition(pos1, n)) {
+            availableMoves.push([pos1, n, '']);
+          }
         }
       }
     }
@@ -370,10 +398,8 @@ export class CasesService {
 
   movePiece(pos1: number, pos2: number) {
     if (this.canMoveTo(pos1, pos2)) {
-      console.log('pos1',pos1);
       var piece = this.getPiece(pos1, this.pieceCases);
       var piece2 = this.pieceCases[pos2]
-      console.log('piece', piece);
 
       if(piece) {
         var newMove = this.textFromPiece(piece)+this.getCaseName(pos2);
@@ -389,6 +415,21 @@ export class CasesService {
         this.colorToMove = this.colorToMove === 'white' ? 'black' : 'white';
         this._colorToMove.next(this.colorToMove);
         this.unSelectCase();
+
+        // Calcul des mvts possibles
+        this.possibleMoves = this.calculMoves(this.colorToMove);
+        if(this.possibleMoves.length < 1) {
+          if(this.refreshThreats(this.colorToMove, this.pieceCases)[1]) {
+            if(this.colorToMove === "white") {
+              console.log('BLACK WON');
+            } else {
+              console.log('WHITE WON');
+            }
+          }
+          else {
+            console.log('PAT');
+          }
+        }
 
         // Calcul des cases attaquées
         this.whiteAttackedCases = this.casesAttacked('white');
@@ -435,11 +476,7 @@ export class CasesService {
     if(this.getPiece(pos1, this.pieceCases)?.color === this.colorToMove) {
       for (var k of this.availableMovesFrom(pos1, this.pieceCases)) {
         if (k[1] === pos2) {
-          if(this.simulatePosition(pos1, pos2)){
-            console.log('isok');
-            return true;
-          }
-          return false;
+          return true;
         }
       }
     }
@@ -487,8 +524,6 @@ export class CasesService {
     var threatsResult = this.refreshThreats(color, this.pieceCases);
     cases = threatsResult[0];
     check = threatsResult[1];
-
-    console.log(threatsResult);
     
     if(check) {
       if(color === "white") {
@@ -522,8 +557,7 @@ export class CasesService {
       pieceCasesCopy[pos2] = pieceCasesCopy[pos1];
       pieceCasesCopy[pos1] = null;
       
-      var threatsResult = this.refreshThreats(color, pieceCasesCopy);
-      console.log('threats',threatsResult);
+      var threatsResult = this.refreshThreats(color, pieceCasesCopy, true);
       if(threatsResult[1]) {
         return false;
       }
@@ -531,10 +565,9 @@ export class CasesService {
     return true;
   }
 
-  refreshThreats(color: "white" | "black", pieceCases: (Piece|null)[]) {
+  refreshThreats(color: "white" | "black", pieceCases: (Piece|null)[], sim?: boolean) {
     var casesOut: number[] = [];
     var pCases: [number,number,string][] = []
-    console.log('pieceCopy', pieceCases);
 
     for (var i = 0; i < pieceCases.length; i++) {
       var piece = pieceCases[i];
@@ -546,23 +579,23 @@ export class CasesService {
             break;
           }
           case 'rook': { 
-            pCases = this.pos2_rook(i, piece.color, pieceCases); 
+            pCases = this.pos2_rook(i, piece.color, pieceCases, sim); 
             break;
           } 
           case 'knight': { 
-            pCases = this.pos2_knight(i, piece.color, pieceCases); 
+            pCases = this.pos2_knight(i, piece.color, pieceCases, sim); 
             break;
           } 
           case 'bishop': { 
-            pCases = this.pos2_bishop(i, piece.color, pieceCases);  
+            pCases = this.pos2_bishop(i, piece.color, pieceCases, sim);  
             break;
           } 
           case 'queen': { 
-            pCases = this.pos2_rook(i, piece.color, pieceCases).concat(this.pos2_bishop(i, piece.color, pieceCases)); 
+            pCases = this.pos2_rook(i, piece.color, pieceCases, sim).concat(this.pos2_bishop(i, piece.color, pieceCases, sim)); 
             break;
           } 
           case 'king': { 
-            pCases = this.pos2_king(i, piece.color, false, pieceCases); // à changer le booléen asap
+            pCases = this.pos2_king(i, piece.color, false, pieceCases, sim); // à changer le booléen asap
             break;
           } 
         }
@@ -585,5 +618,18 @@ export class CasesService {
       }
     }
     return false;
+  }
+
+  calculMoves(color: "white" | "black") {
+    var moves: number[] = []
+    for (var i = 0; i < this.pieceCases.length; i++) {
+      var p = this.pieceCases[i];
+      if (p && p.color === color) {
+        if(this.availableMovesFrom(i, this.pieceCases).length) {
+          moves.push(i);
+        }
+      }
+    }
+    return moves;
   }
 }

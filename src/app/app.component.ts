@@ -41,7 +41,6 @@ export class AppComponent implements OnInit{
     });
 
     this.casesService._whiteCheck.subscribe((check) => {
-      console.log(check, 'check reçu');
       this.whiteCheck = check ? 'white' : 'none';
     });
 
