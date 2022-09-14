@@ -13,6 +13,8 @@ export class CaseComponent implements OnInit {
   selected = false;
   available = false;
 
+  attacked = false;
+
   otherSelected: number = -1;
 
   piece: Piece | null = null;
@@ -25,7 +27,7 @@ export class CaseComponent implements OnInit {
     if(this.numb > -1) {
       this.name = this.casesServices.getCaseName(this.numb);
       this.caseBlanche = this.casesServices.getCaseColor(this.numb) === 'white';
-      this.piece = this.casesServices.getPiece(this.numb);
+      this.piece = this.casesServices.getBoardPiece(this.numb);
     }
     this.casesServices.selectedCase.subscribe((n) => {
       this.selected = n === this.numb;
@@ -47,12 +49,20 @@ export class CaseComponent implements OnInit {
         }
       }
     })
+    this.casesServices._whiteAttackedCases.subscribe((n) => {
+      for(var k of n) {
+        if(this.numb == k) {
+          this.attacked = true;
+          break;
+        }
+      }
+    })
   }
 
   refreshCase() {
     if(this.numb > -1) {
       this.name = this.casesServices.getCaseName(this.numb);
-      this.piece = this.casesServices.getPiece(this.numb);
+      this.piece = this.casesServices.getBoardPiece(this.numb);
     }
   }
 
@@ -62,13 +72,13 @@ export class CaseComponent implements OnInit {
       this.casesServices.unSelectCase();
     }
     else {
-      if(this.otherSelected != this.numb && this.casesServices.getPiece(this.otherSelected)) { // moving piece
-        console.log('move piece', this.otherSelected);
-        this.casesServices.movePiece(this.otherSelected, this.numb)
+      if(this.otherSelected != this.numb && this.casesServices.getBoardPiece(this.otherSelected)) { // moving piece
+        if(this.casesServices.movePiece(this.otherSelected, this.numb))
+        {
+          return;
+        }
       }
-      else {
-        this.casesServices.selectCase(this.numb);
-      }
+      this.casesServices.selectCase(this.numb);
     }
   }
 

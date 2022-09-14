@@ -12,10 +12,27 @@ export class CasesService {
   pieceCases: (Piece|null)[] = [];
 
   selectedCase = new Subject<number>();
-  availableCases = new Subject<(string|number)[][]>();
+  availableCases = new Subject<[number,number,string][]>();
   refreshCases = new Subject<number[]>();
 
-  colorToMove = new Subject<'white' | 'black'>();
+  colorToMove :'white' | 'black' = 'white';
+  _colorToMove = new Subject<('white' | 'black')>();
+
+  movesPlayed: string[] = [];
+  _movePlayed = new Subject<string>();
+
+  piecesCaptured: Piece[][] = [[],[]];
+  _pieceCaptured = new Subject<Piece>();
+
+  whiteAttackedCases: number[] = [];
+  blackAttackedCases: number[] = [];
+  _whiteAttackedCases = new Subject<number[]>();
+  _blackAttackedCases = new Subject<number[]>();
+
+  whiteCheck = false;
+  blackCheck = false;
+  _whiteCheck = new Subject<boolean>();
+  _blackCheck = new Subject<boolean>();
 
   tab120 = [
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -50,7 +67,6 @@ export class CasesService {
     this.initCases();
     this.initPieces();
     this.setupPiecesCustom();
-    this.colorToMove.next('black');
    }
 
   private initCases () {
@@ -123,16 +139,20 @@ export class CasesService {
     return this.colorCases[numb];
   }
 
-  getPiece (numb: number) {
+  getBoardPiece (numb: number) {
     return this.pieceCases[numb];
   }
 
-  isEmpty (numb: number) {
-    return this.getPiece(numb) === null;
+  getPiece (numb: number, cases: (Piece|null)[]) {
+    return cases[numb];
   }
 
-  hasEnemyPiece (numb: number, color: 'white' | 'black') {
-    var piece = this.getPiece(numb);
+  isEmpty (numb: number, cases: (Piece|null)[]) {
+    return this.getPiece(numb, cases) === null;
+  }
+
+  hasEnemyPiece (numb: number, color: 'white' | 'black', cases: (Piece|null)[]) {
+    var piece = this.getPiece(numb, cases);
     if(piece) {
       return piece.color != color
     }
@@ -141,7 +161,7 @@ export class CasesService {
 
   selectCase (numb: number) {
     this.selectedCase.next(numb);
-    this.availableCases.next(this.availableMovesFrom(numb));
+    this.availableCases.next(this.availableMovesFrom(numb, this.pieceCases));
   }
 
   unSelectCase () {
@@ -149,21 +169,22 @@ export class CasesService {
     this.availableCases.next([]);
   }
 
-  pos2_bishop (pos1: number, color: 'white'|'black') {
-    var availableMoves: (string|number)[][] = [];
+  pos2_bishop (pos1: number, color: 'white'|'black', cases: (Piece|null)[]) {
+
+    var availableMoves: [number,number,string][] = [];
     for(var k of this.moves_bishop) {
       var j = 1;
       while(true) {
         var n = this.tab120[this.tab64[pos1] + (k * j)]
         if(n != -1) { //as we are not out of the board
-          if(this.isEmpty(n) || this.hasEnemyPiece(n, color)) {
+          if(this.isEmpty(n, cases) || this.hasEnemyPiece(n, color, cases)) {
             availableMoves.push([pos1, n, '']);
           }
         }
         else { // outside the board
           break;
         }
-        if(!this.isEmpty(n)) {
+        if(!this.isEmpty(n, cases)) {
           break;
         }
         j = j+1;
@@ -172,12 +193,12 @@ export class CasesService {
     return availableMoves;
   }
 
-  pos2_knight (pos1: number, color: 'white'|'black') {
-    var availableMoves: (string|number)[][] = [];
+  pos2_knight (pos1: number, color: 'white'|'black', cases: (Piece|null)[]) {
+    var availableMoves: [number,number,string][] = [];
     for(var i of this.moves_knight) {
       var n = this.tab120[this.tab64[pos1] + i]
       if(n != -1) { //as we are not out of the board
-        if(this.isEmpty(n) || this.hasEnemyPiece(n, color)) {
+        if(this.isEmpty(n, cases) || this.hasEnemyPiece(n, color, cases)) {
           availableMoves.push([pos1, n, '']);
         }
       }
@@ -185,21 +206,21 @@ export class CasesService {
     return availableMoves;
   }
 
-  pos2_rook (pos1: number, color: 'white'|'black') {
-    var availableMoves: (string|number)[][] = [];
+  pos2_rook (pos1: number, color: 'white'|'black', cases: (Piece|null)[]) {
+    var availableMoves: [number,number,string][] = [];
     for(var k of this.moves_rook) {
       var j = 1;
       while(true) {
         var n = this.tab120[this.tab64[pos1] + (k * j)]
         if(n != -1) { //as we are not out of the board
-          if(this.isEmpty(n) || this.hasEnemyPiece(n, color)) {
+          if(this.isEmpty(n, cases) || this.hasEnemyPiece(n, color, cases)) {
             availableMoves.push([pos1, n, '']);
           }
         }
         else { // outside the board
           break;
         }
-        if(!this.isEmpty(n)) {
+        if(!this.isEmpty(n, cases)) {
           break;
         }
         j = j+1;
@@ -208,12 +229,12 @@ export class CasesService {
     return availableMoves;
   }
 
-  pos2_pawn (pos1: number, color: 'white'|'black') {
-    var availableMoves: (string|number)[][] = [];
+  pos2_pawn (pos1: number, color: 'white'|'black', cases: (Piece|null)[]) {
+    var availableMoves: [number,number,string][] = [];
     if (color === 'white') {
       var n = this.tab120[this.tab64[pos1]-10];
       if(n != -1) {
-        if(this.isEmpty(n)) {
+        if(this.isEmpty(n, cases)) {
           /*
           # If the PAWN has arrived to rank 8 (square 0 to 7), 
                     if(n<8):
@@ -228,7 +249,7 @@ export class CasesService {
         }
       }
       if(pos1 <=55 && pos1 >= 48) { // first row
-        if(this.isEmpty(pos1-8) && this.isEmpty(pos1-16)) {
+        if(this.isEmpty(pos1-8, cases) && this.isEmpty(pos1-16, cases)) {
           availableMoves.push([pos1, pos1-16, '']);
         }
       }
@@ -236,7 +257,7 @@ export class CasesService {
       //Capture upper left
       var n = this.tab120[this.tab64[pos1]-11];
       if(n != -1) {
-        if(this.hasEnemyPiece(n, color) /* OU N EST UNE CASE D'EN PASSANT*/) {
+        if(this.hasEnemyPiece(n, color, cases) /* OU N EST UNE CASE D'EN PASSANT*/) {
                     /*
           # If the PAWN has arrived to rank 8 (square 0 to 7), 
                     if(n<8):
@@ -253,7 +274,7 @@ export class CasesService {
       //Capture upper right
       var n = this.tab120[this.tab64[pos1]-9];
       if(n != -1) {
-        if(this.hasEnemyPiece(n, color) /* OU N EST UNE CASE D'EN PASSANT*/) {
+        if(this.hasEnemyPiece(n, color, cases) /* OU N EST UNE CASE D'EN PASSANT*/) {
                     /*
           # If the PAWN has arrived to rank 8 (square 0 to 7), 
                     if(n<8):
@@ -271,7 +292,7 @@ export class CasesService {
     else if (color === 'black') {
       var n = this.tab120[this.tab64[pos1]+10];
       if(n != -1) {
-        if(this.isEmpty(n)) {
+        if(this.isEmpty(n, cases)) {
           /*
           # If the PAWN has arrived to rank 8 (square 0 to 7), 
                     if(n>55):
@@ -286,7 +307,7 @@ export class CasesService {
         }
       }
       if(pos1 <=15 && pos1 >= 8) { // first row
-        if(this.isEmpty(pos1+8) && this.isEmpty(pos1+16)) {
+        if(this.isEmpty(pos1+8, cases) && this.isEmpty(pos1+16, cases)) {
           availableMoves.push([pos1, pos1+16, '']);
         }
       }
@@ -294,7 +315,7 @@ export class CasesService {
       //Capture bottom left
       var n = this.tab120[this.tab64[pos1]+11];
       if(n != -1) {
-        if(this.hasEnemyPiece(n, color) /* OU N EST UNE CASE D'EN PASSANT*/) {
+        if(this.hasEnemyPiece(n, color, cases) /* OU N EST UNE CASE D'EN PASSANT*/) {
                     /*
           # If the PAWN has arrived to rank 8 (square 0 to 7), 
                     if(n>55):
@@ -311,7 +332,7 @@ export class CasesService {
       //Capture bottom right
       var n = this.tab120[this.tab64[pos1]+9];
       if(n != -1) {
-        if(this.hasEnemyPiece(n, color) /* OU N EST UNE CASE D'EN PASSANT*/) {
+        if(this.hasEnemyPiece(n, color, cases) /* OU N EST UNE CASE D'EN PASSANT*/) {
                     /*
           # If the PAWN has arrived to rank 8 (square 0 to 7), 
                     if(n>55):
@@ -329,12 +350,12 @@ export class CasesService {
     return availableMoves;
   }
 
-  pos2_king (pos1: number, color: 'white'|'black', isAttacked: boolean) {
-    var availableMoves: (string|number)[][] = [];
+  pos2_king (pos1: number, color: 'white'|'black', isAttacked: boolean, cases: (Piece|null)[]) {
+    var availableMoves: [number,number,string][] = [];
     for(var i of this.moves_rook.concat(this.moves_bishop)) {
       var n = this.tab120[this.tab64[pos1] + i]
       if(n != -1) { //as we are not out of the board
-        if(this.isEmpty(n) || this.hasEnemyPiece(n, color)) {
+        if(this.isEmpty(n, cases) || this.hasEnemyPiece(n, color, cases)) {
           availableMoves.push([pos1, n, '']);
         }
       }
@@ -349,34 +370,58 @@ export class CasesService {
 
   movePiece(pos1: number, pos2: number) {
     if (this.canMoveTo(pos1, pos2)) {
-      this.pieceCases[pos2] = this.pieceCases[pos1];
-      this.pieceCases[pos1] = null;
-      this.refreshCases.next([pos1, pos2]);
-      this.unSelectCase();
+      console.log('pos1',pos1);
+      var piece = this.getPiece(pos1, this.pieceCases);
+      var piece2 = this.pieceCases[pos2]
+      console.log('piece', piece);
+
+      if(piece) {
+        var newMove = this.textFromPiece(piece)+this.getCaseName(pos2);
+        this.movesPlayed.push(newMove);
+        this._movePlayed.next(newMove);
+
+        if(piece2) {
+          this.eliminatePiece(piece2);
+        }
+        this.pieceCases[pos2] = this.pieceCases[pos1];
+        this.pieceCases[pos1] = null;
+        this.refreshCases.next([pos1, pos2]);
+        this.colorToMove = this.colorToMove === 'white' ? 'black' : 'white';
+        this._colorToMove.next(this.colorToMove);
+        this.unSelectCase();
+
+        // Calcul des cases attaquées
+        this.whiteAttackedCases = this.casesAttacked('white');
+        this.blackAttackedCases = this.casesAttacked('black');
+        this._whiteAttackedCases.next(this.whiteAttackedCases);
+        this._blackAttackedCases.next(this.blackAttackedCases);
+      }
+      return true;
     }
+    return false;
   }
 
-  availableMovesFrom(pos: number) {
-    var piece = this.getPiece(pos);
+  availableMovesFrom(pos: number, cases: (Piece|null)[]) {
+    var piece = this.getPiece(pos, cases);
     if(piece) {
       switch(piece.type) { 
         case 'pawn': { 
-          return this.pos2_pawn(pos, piece.color); 
+          return this.pos2_pawn(pos, piece.color, cases); 
         } 
         case 'rook': { 
-          return this.pos2_rook(pos, piece.color); 
+          return this.pos2_rook(pos, piece.color, cases); 
         } 
         case 'knight': { 
-          return this.pos2_knight(pos, piece.color); 
+          return this.pos2_knight(pos, piece.color, cases); 
         } 
         case 'bishop': { 
-          return this.pos2_bishop(pos, piece.color); 
+          return this.pos2_bishop(pos, piece.color, cases); 
         } 
         case 'queen': { 
-          return this.pos2_rook(pos, piece.color).concat(this.pos2_bishop(pos, piece.color)); 
+          return this.pos2_rook(pos, piece.color, cases).concat(this.pos2_bishop(pos, piece.color, cases)); 
         } 
         case 'king': { 
-          return this.pos2_king(pos, piece.color, false); // à changer le booléen asap
+          return this.pos2_king(pos, piece.color, false, cases); // à changer le booléen asap
         } 
         default: { 
           return [];
@@ -387,8 +432,155 @@ export class CasesService {
   }
 
   canMoveTo(pos1: number, pos2: number) {
-    for (var k of this.availableMovesFrom(pos1)) {
-      if (k[1] === pos2) {
+    if(this.getPiece(pos1, this.pieceCases)?.color === this.colorToMove) {
+      for (var k of this.availableMovesFrom(pos1, this.pieceCases)) {
+        if (k[1] === pos2) {
+          if(this.simulatePosition(pos1, pos2)){
+            console.log('isok');
+            return true;
+          }
+          return false;
+        }
+      }
+    }
+    return false;
+  }
+
+  textFromPiece(piece: Piece) {
+    if(piece) {
+      switch(piece.type) { 
+        case 'pawn': { 
+          return ''; 
+        } 
+        case 'rook': { 
+          return 'R'; 
+        } 
+        case 'knight': { 
+          return 'N'; 
+        } 
+        case 'bishop': { 
+          return 'B'; 
+        } 
+        case 'queen': { 
+          return 'Q'; 
+        } 
+        case 'king': { 
+          return 'K';
+        } 
+        default: { 
+          return [];
+        } 
+      } 
+    }
+    return '';
+  }
+
+  eliminatePiece(piece: Piece) {
+    this._pieceCaptured.next(piece);
+    this.piecesCaptured[piece.color === 'white'? 0 : 1].push(piece);
+  }
+
+  casesAttacked(color: "white" | "black") { // Returns the cases of the white pieces being threatened
+    var cases: number[] = [];
+    var check: boolean;
+
+    var threatsResult = this.refreshThreats(color, this.pieceCases);
+    cases = threatsResult[0];
+    check = threatsResult[1];
+
+    console.log(threatsResult);
+    
+    if(check) {
+      if(color === "white") {
+        this.whiteCheck = true;
+        this._whiteCheck.next(true);
+      }
+      if(color === "black") {
+        this.blackCheck = true;
+        this._blackCheck.next(true);
+      }
+    }
+    else {
+      if(color === "white") {
+        this.whiteCheck = false;
+        this._whiteCheck.next(false);
+      }
+      if(color === "black") {
+        this.blackCheck = false;
+        this._blackCheck.next(false);
+      }
+    }
+    return cases;
+  }
+
+  
+  simulatePosition(pos1: number, pos2: number) {
+    var piece1 = this.getPiece(pos1, this.pieceCases);
+    if(piece1) {
+      var color = piece1.color;
+      var pieceCasesCopy: (Piece|null)[] = Object.assign([], this.pieceCases);
+      pieceCasesCopy[pos2] = pieceCasesCopy[pos1];
+      pieceCasesCopy[pos1] = null;
+      
+      var threatsResult = this.refreshThreats(color, pieceCasesCopy);
+      console.log('threats',threatsResult);
+      if(threatsResult[1]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  refreshThreats(color: "white" | "black", pieceCases: (Piece|null)[]) {
+    var casesOut: number[] = [];
+    var pCases: [number,number,string][] = []
+    console.log('pieceCopy', pieceCases);
+
+    for (var i = 0; i < pieceCases.length; i++) {
+      var piece = pieceCases[i];
+      if(piece && piece?.color != color) {
+        pCases = [];
+        switch(piece.type) {
+          case 'pawn': {
+            // faire une fct spéciale pour attaque de pion
+            break;
+          }
+          case 'rook': { 
+            pCases = this.pos2_rook(i, piece.color, pieceCases); 
+            break;
+          } 
+          case 'knight': { 
+            pCases = this.pos2_knight(i, piece.color, pieceCases); 
+            break;
+          } 
+          case 'bishop': { 
+            pCases = this.pos2_bishop(i, piece.color, pieceCases);  
+            break;
+          } 
+          case 'queen': { 
+            pCases = this.pos2_rook(i, piece.color, pieceCases).concat(this.pos2_bishop(i, piece.color, pieceCases)); 
+            break;
+          } 
+          case 'king': { 
+            pCases = this.pos2_king(i, piece.color, false, pieceCases); // à changer le booléen asap
+            break;
+          } 
+        }
+        for (var list of pCases) {
+          casesOut.push(list[1]);
+        }
+      }
+    }
+    var check: boolean;
+    check = this.isChecked(color, pieceCases, casesOut);
+    var threatsResults: [number[], boolean] = [casesOut, check];
+
+    return threatsResults;
+  }
+
+  isChecked(color: "white" | "black", pieceCases: (Piece|null)[], casesThreatened :number[]) {
+    for (var c of casesThreatened) {
+      if(pieceCases[c]?.type === 'king' && pieceCases[c]?.color === color) {
         return true;
       }
     }

@@ -1,8 +1,16 @@
 <div class="page-container">
     <mat-card class="game-infos">
         <mat-card-title>Game infos</mat-card-title>
+        <span *ngFor="let move of moves">{{move}}</span>
     </mat-card>
     <div class="board-container">
         <app-board></app-board>
     </div>
+    <mat-card class="game-infos">
+        <mat-card-title>Other</mat-card-title>
+        {{colorToMove}}
+        <span *ngIf="whiteCheck!='none'">{{whiteCheck}} check !</span>
+        <span *ngIf="blackCheck!='none'">{{blackCheck}} check !</span>
+        <app-piece *ngFor="let piece of piecesCaptured" [piece]="piece"></app-piece>
+    </mat-card>
 </div>
