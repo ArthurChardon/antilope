@@ -36,6 +36,11 @@ export class CasesService {
   _whiteCheck = new Subject<boolean>();
   _blackCheck = new Subject<boolean>();
 
+  whiteCanOOO = true;
+  whiteCanOO = true;
+  blackCanOOO = true;
+  blackCanOO = true;
+
   tab120 = [
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -155,7 +160,7 @@ export class CasesService {
     return this.getPiece(numb, cases) === null;
   }
 
-  hasEnemyPiece (numb: number, color: 'white' | 'black', cases: (Piece|null)[]) {
+  hasEnemyPiece (numb: number, color: 'white' | 'black', cases: (Piece|null)[]) { // color of the player, numb of the case to be checked in cases
     var piece = this.getPiece(numb, cases);
     if(piece) {
       return piece.color != color
@@ -377,6 +382,7 @@ export class CasesService {
   }
 
   pos2_king (pos1: number, color: 'white'|'black', isAttacked: boolean, cases: (Piece|null)[], sim?: boolean) {
+    // il faut (pour le pion aussi) gérer les déplacements et les menaces, par exemple sur un roque, le roi peut se déplacer mais pas menacer sur une case
     var availableMoves: [number,number,string][] = [];
     for(var i of this.moves_rook.concat(this.moves_bishop)) {
       var n = this.tab120[this.tab64[pos1] + i]
@@ -392,26 +398,131 @@ export class CasesService {
       return availableMoves;
     }
     // castle moves
+    if(color === 'white' && !this.whiteCheck && this.whiteCanOO && this.isEmpty(61, cases) && this.isEmpty(62, cases)) {
+      var pathThreatened = false;
+      for (var threathenedCase of this.whiteAttackedCases) {
+        if (threathenedCase == 61 || threathenedCase == 62) {
+          pathThreatened = true;
+          break;
+        }
+      }
+      if(!pathThreatened) {
+        availableMoves.push([pos1, 62, 'OO'])
+      }
+    } else if(color === 'black' && !this.blackCheck && this.blackCanOO && this.isEmpty(5, cases) && this.isEmpty(6, cases)) {
+      var pathThreatened = false;
+      for (var threathenedCase of this.blackAttackedCases) {
+        if (threathenedCase == 5 || threathenedCase == 6) {
+          pathThreatened = true;
+          break;
+        }
+      }
+      if(!pathThreatened) {
+        availableMoves.push([pos1, 6, 'OO'])
+      }
+    }
+    if(color === 'white' && !this.whiteCheck &&  this.whiteCanOOO && this.isEmpty(57, cases) && this.isEmpty(58, cases) && this.isEmpty(59, cases)) {
+      var pathThreatened = false;
+      for (var threathenedCase of this.whiteAttackedCases) {
+        if (threathenedCase == 57 || threathenedCase == 58 || threathenedCase === 59) {
+          pathThreatened = true;
+          break;
+        }
+      }
+      if(!pathThreatened) {
+        availableMoves.push([pos1, 58, 'OOO'])
+      }
+    } else if(color === 'black' && !this.blackCheck && this.blackCanOOO && this.isEmpty(1, cases) && this.isEmpty(2, cases) && this.isEmpty(3, cases)) {
+      var pathThreatened = false;
+      for (var threathenedCase of this.blackAttackedCases) {
+        if (threathenedCase == 1 || threathenedCase == 2 || threathenedCase === 3) {
+          pathThreatened = true;
+          break;
+        }
+      }
+      if(!pathThreatened) {
+        availableMoves.push([pos1, 2, 'OOO'])
+      }
+    }
 
     return availableMoves;
   }
 
   movePiece(pos1: number, pos2: number) {
-    if (this.canMoveTo(pos1, pos2)) {
+    var canMove = this.canMoveTo(pos1, pos2);
+    if (canMove[0]) {
       var piece = this.getPiece(pos1, this.pieceCases);
       var piece2 = this.pieceCases[pos2]
+      var newMove = '';
 
       if(piece) {
-        var newMove = this.textFromPiece(piece)+this.getCaseName(pos2);
+        if(canMove[1] != '') { // special move
+          switch(canMove[1]) {
+            case 'OO': {
+              this.pieceCases[pos2] = this.pieceCases[pos1];
+              this.pieceCases[pos1] = null;
+              this.pieceCases[pos2-1] = this.pieceCases[pos2+1];
+              this.pieceCases[pos2+1] = null;
+
+              this.refreshCases.next([pos1, pos2, pos2-1, pos2+1]);
+              newMove = 'O-O';
+              break;
+            }
+            case 'OOO': {
+              this.pieceCases[pos2] = this.pieceCases[pos1];
+              this.pieceCases[pos1] = null;
+              this.pieceCases[pos2+1] = this.pieceCases[pos2-2];
+              this.pieceCases[pos2-2] = null;
+
+              this.refreshCases.next([pos1, pos2, pos2+1, pos2-2]);
+              newMove = 'O-O-O';
+              break;
+            }
+
+            default : { // convert a pawn
+              
+            }
+          }
+        }
+        else { // classic move
+          newMove = this.textFromPiece(piece)+this.getCaseName(pos2);
+          this.movesPlayed.push(newMove);
+          this._movePlayed.next(newMove);
+  
+          if(piece2) {
+            this.eliminatePiece(piece2);
+          }
+          this.pieceCases[pos2] = this.pieceCases[pos1];
+          this.pieceCases[pos1] = null;
+          this.refreshCases.next([pos1, pos2]);
+
+        }
+
+        if((this.whiteCanOO || this.whiteCanOOO) && piece.type === 'king' && piece.color === 'white') {
+          this.whiteCanOO = false;
+          this.whiteCanOOO = false;
+        } else if((this.blackCanOO || this.blackCanOOO) && piece.type === 'king' && piece.color === 'black') {
+          this.blackCanOO = false;
+          this.blackCanOOO = false;
+        }
+
+        if((this.whiteCanOO || this.whiteCanOOO) && piece.type === 'rook' && piece.color === 'white') {
+          if(pos1==56) {
+            this.whiteCanOOO = false;
+          } else if(pos1==63) {
+            this.whiteCanOO = false;
+          }
+        } else if((this.blackCanOO || this.blackCanOOO) && piece.type === 'rook' && piece.color === 'black') {
+          if(pos1==0) {
+            this.blackCanOOO = false;
+          } else if(pos1==7) {
+            this.blackCanOO = false;
+          }
+        }
+
         this.movesPlayed.push(newMove);
         this._movePlayed.next(newMove);
-
-        if(piece2) {
-          this.eliminatePiece(piece2);
-        }
-        this.pieceCases[pos2] = this.pieceCases[pos1];
-        this.pieceCases[pos1] = null;
-        this.refreshCases.next([pos1, pos2]);
+        
         this.colorToMove = this.colorToMove === 'white' ? 'black' : 'white';
         this._colorToMove.next(this.colorToMove);
         this.unSelectCase();
@@ -473,14 +584,17 @@ export class CasesService {
   }
 
   canMoveTo(pos1: number, pos2: number) {
+    var output: [boolean, string] = [false, ''];
     if(this.getPiece(pos1, this.pieceCases)?.color === this.colorToMove) {
       for (var k of this.availableMovesFrom(pos1, this.pieceCases)) {
         if (k[1] === pos2) {
-          return true;
+          output[0] = true;
+          output[1] = k[2];
+          return output;
         }
       }
     }
-    return false;
+    return output;
   }
 
   textFromPiece(piece: Piece) {
@@ -517,7 +631,7 @@ export class CasesService {
     this.piecesCaptured[piece.color === 'white'? 0 : 1].push(piece);
   }
 
-  casesAttacked(color: "white" | "black") { // Returns the cases of the white pieces being threatened
+  casesAttacked(color: "white" | "black") { // Returns the cases of the colored pieces being threatened
     var cases: number[] = [];
     var check: boolean;
 
@@ -547,7 +661,6 @@ export class CasesService {
     }
     return cases;
   }
-
   
   simulatePosition(pos1: number, pos2: number) {
     var piece1 = this.getPiece(pos1, this.pieceCases);

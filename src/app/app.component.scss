@@ -51,6 +51,25 @@ $antilope-theme: mat.define-light-theme((
     height: fit-content;
     min-height: 640px;
     min-width: 250px;
+    background-color: rgba(46, 0, 20, 0.25);
 
     margin: 15px;
+}
+
+.color-to-move {
+  margin-left: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  &.blackMove {
+    background-color: black;
+  }
+  &.whiteMove {
+    background-color: white;
+  }
+}
+
+.trait {
+  display: flex;
+  align-items: center;
 }

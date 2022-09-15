@@ -1,4 +1,5 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { SizeProp } from '@fortawesome/fontawesome-svg-core';
 import { faChessRook, faChessKnight, faChessBishop, faChessQueen, faChessKing, faChessPawn } from '@fortawesome/free-solid-svg-icons';
 import { Piece } from './piece';
 
@@ -9,12 +10,16 @@ import { Piece } from './piece';
 })
 export class PieceComponent implements OnInit, OnChanges {
   @Input() piece: Piece | null = null;
+  @Input() size: 'small' | 'medium' = 'medium';
+
+  pieceSize: SizeProp | undefined;
   faPiece = faChessPawn;
 
   constructor() { }
 
   ngOnInit(): void {
     this.setIcon();
+    this.pieceSize = this.size === 'medium' ? "4x" : "3x";
   }
 
   ngOnChanges(changes: SimpleChanges): void {
