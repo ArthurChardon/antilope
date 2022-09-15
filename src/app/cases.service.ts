@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Piece } from './piece/piece';
 import { PieceComponent } from './piece/piece.component';
-import { Observable, of, Subject } from 'rxjs';
+import { Observable, of, Subject, Subscription } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +10,10 @@ export class CasesService {
   convertCases: string[] = [];
   colorCases: string[] = [];
   pieceCases: (Piece|null)[] = [];
+
+  enPassant: number = -1;
+
+  endTurn = new Subject<string>();
 
   selectedCase = new Subject<number>();
   availableCases = new Subject<[number,number,string][]>();
@@ -40,6 +44,13 @@ export class CasesService {
   whiteCanOO = true;
   blackCanOOO = true;
   blackCanOO = true;
+
+  _promotePawn = new Subject<number>();
+  nbPromote: number = -1;
+  nbPromoteFrom: number = -1;
+  _promoteChoice = new Subject<Piece["type"]>();
+  promotionWait = false;
+  choiceSubscription: Subscription | null = null;
 
   tab120 = [
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -74,6 +85,10 @@ export class CasesService {
     this.initCases();
     this.initPieces();
     this.setupPiecesCustom();
+
+    this.endTurn.subscribe((move) => {
+      this.endMove(move);
+    });
    }
 
   private initCases () {
@@ -93,9 +108,9 @@ export class CasesService {
         count += 1;
       }
     }
-   }
+  }
 
-   private initPieces () {
+  private initPieces () {
     this.pieceCases[0] = {type: 'rook', color: 'black'};
     this.pieceCases[1] = {type: 'knight', color: 'black'};
     this.pieceCases[2] = {type: 'bishop', color: 'black'};
@@ -131,18 +146,22 @@ export class CasesService {
     this.pieceCases[53] = {type: 'pawn', color: 'white'};
     this.pieceCases[54] = {type: 'pawn', color: 'white'};
     this.pieceCases[55] = {type: 'pawn', color: 'white'};
-   }
+  }
 
-   private setupPiecesCustom() {
+  private setupPiecesCustom() {
     // this.pieceCases[35] = {type: 'king', color: 'white'};
     // this.pieceCases[12] = {type: 'king', color: 'black'};
     // //this.pieceCases[35] = {type: 'king', color: 'white'};
     // this.pieceCases[36] = {type: 'queen', color: 'white'};
-   }
+    // this.pieceCases[36] = {type: 'pawn', color: 'white'};
+    // this.pieceCases[12] = {type: 'pawn', color: 'white'};
+    // this.pieceCases[13] = {type: 'pawn', color: 'white'};
+    // this.pieceCases[41] = {type: 'pawn', color: 'black'};
+  }
 
   getCaseName (numb: number) {
       return this.convertCases[numb];
-   }
+  }
 
   getCaseColor (numb: number) {
     return this.colorCases[numb];
@@ -176,6 +195,377 @@ export class CasesService {
   unSelectCase () {
     this.selectedCase.next(-1);
     this.availableCases.next([]);
+  }
+
+  movePiece(pos1: number, pos2: number) {
+    var canMove = this.canMoveTo(pos1, pos2);
+    if (canMove[0]) {
+      var piece = this.getPiece(pos1, this.pieceCases);
+      var piece2 = this.pieceCases[pos2]
+      var newMove = '';
+      this.enPassant = -1;
+
+      if(piece) {
+        if(canMove[1] != '') { // special move
+          switch(canMove[1]) {
+            case 'OO': {
+              this.pieceCases[pos2] = this.pieceCases[pos1];
+              this.pieceCases[pos1] = null;
+              this.pieceCases[pos2-1] = this.pieceCases[pos2+1];
+              this.pieceCases[pos2+1] = null;
+
+              this.refreshCases.next([pos1, pos2, pos2-1, pos2+1]);
+              newMove = 'O-O';
+              this.endTurn.next(newMove);
+              break;
+            }
+            case 'OOO': {
+              this.pieceCases[pos2] = this.pieceCases[pos1];
+              this.pieceCases[pos1] = null;
+              this.pieceCases[pos2+1] = this.pieceCases[pos2-2];
+              this.pieceCases[pos2-2] = null;
+
+              this.refreshCases.next([pos1, pos2, pos2+1, pos2-2]);
+              newMove = 'O-O-O';
+              this.endTurn.next(newMove);
+              break;
+            }
+
+            case 'prom' : { // convert a pawn
+              console.log('convert', pos1);
+              this._promotePawn.next(pos1);
+              this.nbPromote = pos2;
+              this.nbPromoteFrom = pos1;
+              this.promotionWait = true;
+              this.choiceSubscription = this._promoteChoice.subscribe((type) => {
+                this.promoteTo(type);
+              })            
+              break;
+            }
+
+            case '2pawn' : {
+              this.pieceCases[pos2] = this.pieceCases[pos1];
+              this.pieceCases[pos1] = null;
+              this.enPassant = (pos1+pos2)/2;
+              this.refreshCases.next([pos1, pos2]);
+              newMove = this.getCaseName(pos2);
+              this.endTurn.next(newMove);
+              break;
+            }
+
+            case 'ep' : {
+              this.pieceCases[pos2] = this.pieceCases[pos1];
+              this.pieceCases[pos1] = null;
+              var posPawn2 = piece.color === 'white' ? 8 : -8;
+              var pawn2 = this.pieceCases[pos2+posPawn2]
+              if(pawn2) {
+                this.eliminatePiece(pawn2);
+              }
+              this.pieceCases[pos2+posPawn2] = null;
+              this.enPassant = (pos1+pos2)/2;
+              this.refreshCases.next([pos1, pos2, pos2+posPawn2]);
+              newMove = this.getCaseName(pos1).slice(0,1)+'x'+this.getCaseName(pos2);
+              this.endTurn.next(newMove);
+              break;
+            }
+          }
+        }
+        else { // classic move
+          var captNotation = '';
+  
+          if(piece2) {
+            this.eliminatePiece(piece2);
+            captNotation = 'x';
+          }
+          newMove = this.textFromPiece(piece.type)+captNotation+this.getCaseName(pos2);
+          this.pieceCases[pos2] = this.pieceCases[pos1];
+          this.pieceCases[pos1] = null;
+          this.refreshCases.next([pos1, pos2]);
+          this.endTurn.next(newMove);
+        }
+
+        if((this.whiteCanOO || this.whiteCanOOO) && piece.type === 'king' && piece.color === 'white') {
+          this.whiteCanOO = false;
+          this.whiteCanOOO = false;
+        } else if((this.blackCanOO || this.blackCanOOO) && piece.type === 'king' && piece.color === 'black') {
+          this.blackCanOO = false;
+          this.blackCanOOO = false;
+        }
+
+        if((this.whiteCanOO || this.whiteCanOOO) && piece.type === 'rook' && piece.color === 'white') {
+          if(pos1==56) {
+            this.whiteCanOOO = false;
+          } else if(pos1==63) {
+            this.whiteCanOO = false;
+          }
+        } else if((this.blackCanOO || this.blackCanOOO) && piece.type === 'rook' && piece.color === 'black') {
+          if(pos1==0) {
+            this.blackCanOOO = false;
+          } else if(pos1==7) {
+            this.blackCanOO = false;
+          }
+        }
+
+      }
+      return true;
+    }
+    return false;
+  }
+
+  availableMovesFrom(pos: number, cases: (Piece|null)[]) {
+    var piece = this.getPiece(pos, cases);
+    if(piece) {
+      switch(piece.type) { 
+        case 'pawn': { 
+          return this.pos2_pawn(pos, piece.color, cases); 
+        } 
+        case 'rook': { 
+          return this.pos2_rook(pos, piece.color, cases); 
+        } 
+        case 'knight': { 
+          return this.pos2_knight(pos, piece.color, cases); 
+        } 
+        case 'bishop': { 
+          return this.pos2_bishop(pos, piece.color, cases); 
+        } 
+        case 'queen': { 
+          return this.pos2_rook(pos, piece.color, cases).concat(this.pos2_bishop(pos, piece.color, cases)); 
+        } 
+        case 'king': { 
+          return this.pos2_king(pos, piece.color, false, cases); // à changer le booléen asap
+        } 
+        default: { 
+          return [];
+        } 
+      } 
+    }
+    return [];
+  }
+
+  canMoveTo(pos1: number, pos2: number) {
+    var output: [boolean, string] = [false, ''];
+    if(this.getPiece(pos1, this.pieceCases)?.color === this.colorToMove) {
+      for (var k of this.availableMovesFrom(pos1, this.pieceCases)) {
+        if (k[1] === pos2) {
+          output[0] = true;
+          output[1] = k[2];
+          return output;
+        }
+      }
+    }
+    return output;
+  }
+
+  endMove(newMove: string) {
+    var checkMateEndGame = false;
+    this.colorToMove = this.colorToMove === 'white' ? 'black' : 'white';
+    this._colorToMove.next(this.colorToMove);
+    this.unSelectCase();
+    // Calcul des mvts possibles
+    this.possibleMoves = this.calculMoves(this.colorToMove);
+    if(this.possibleMoves.length < 1) {
+      if(this.refreshThreats(this.colorToMove, this.pieceCases)[1]) {
+        newMove = newMove + '#';
+        checkMateEndGame = true;
+        if(this.colorToMove === "white") {
+          console.log('BLACK WON');
+        } else {
+          console.log('WHITE WON');
+        }
+      }
+      else {
+        console.log('PAT');
+      }
+    }
+    // Calcul des cases attaquées
+    this.whiteAttackedCases = this.casesAttacked('white');
+    this.blackAttackedCases = this.casesAttacked('black');
+    this._whiteAttackedCases.next(this.whiteAttackedCases);
+    this._blackAttackedCases.next(this.blackAttackedCases);
+    
+
+    if(!checkMateEndGame && (this.whiteCheck || this.blackCheck)) {
+      console.log('check');
+      newMove = newMove + '+';
+    }
+
+    this.movesPlayed.push(newMove);
+    this._movePlayed.next(newMove);
+
+    // Unsubscribe from promotion
+    if(this.choiceSubscription) {
+      this.choiceSubscription.unsubscribe();
+      this.choiceSubscription = null;
+    }
+  }
+
+  textFromPiece(pieceType: Piece["type"]) {
+    switch(pieceType) { 
+      case 'pawn': { 
+        return ''; 
+      } 
+      case 'rook': { 
+        return 'R'; 
+      } 
+      case 'knight': { 
+        return 'N'; 
+      } 
+      case 'bishop': { 
+        return 'B'; 
+      } 
+      case 'queen': { 
+        return 'Q'; 
+      } 
+      case 'king': { 
+        return 'K';
+      } 
+      default: { 
+        return [];
+      } 
+    }
+    return '';
+  }
+
+  eliminatePiece(piece: Piece) {
+    this._pieceCaptured.next(piece);
+    this.piecesCaptured[piece.color === 'white'? 0 : 1].push(piece);
+  }
+
+  casesAttacked(color: "white" | "black") { // Returns the cases of the colored pieces being threatened
+    var cases: number[] = [];
+    var check: boolean;
+
+    var threatsResult = this.refreshThreats(color, this.pieceCases);
+    cases = threatsResult[0];
+    check = threatsResult[1];
+    
+    if(check) {
+      if(color === "white") {
+        this.whiteCheck = true;
+        this._whiteCheck.next(true);
+      }
+      if(color === "black") {
+        this.blackCheck = true;
+        this._blackCheck.next(true);
+      }
+    }
+    else {
+      if(color === "white") {
+        this.whiteCheck = false;
+        this._whiteCheck.next(false);
+      }
+      if(color === "black") {
+        this.blackCheck = false;
+        this._blackCheck.next(false);
+      }
+    }
+    return cases;
+  }
+  
+  simulatePosition(pos1: number, pos2: number) {
+    var piece1 = this.getPiece(pos1, this.pieceCases);
+    if(piece1) {
+      var color = piece1.color;
+      var pieceCasesCopy: (Piece|null)[] = Object.assign([], this.pieceCases);
+      pieceCasesCopy[pos2] = pieceCasesCopy[pos1];
+      pieceCasesCopy[pos1] = null;
+      
+      var threatsResult = this.refreshThreats(color, pieceCasesCopy, true);
+      if(threatsResult[1]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  refreshThreats(color: "white" | "black", pieceCases: (Piece|null)[], sim?: boolean) {
+    var casesOut: number[] = [];
+    var pCases: [number,number,string][] = []
+
+    for (var i = 0; i < pieceCases.length; i++) {
+      var piece = pieceCases[i];
+      if(piece && piece?.color != color) {
+        pCases = [];
+        switch(piece.type) {
+          case 'pawn': {
+            pCases = this.capture_pawn(i, piece.color, pieceCases, sim);
+            break;
+          }
+          case 'rook': { 
+            pCases = this.pos2_rook(i, piece.color, pieceCases, sim); 
+            break;
+          } 
+          case 'knight': { 
+            pCases = this.pos2_knight(i, piece.color, pieceCases, sim); 
+            break;
+          } 
+          case 'bishop': { 
+            pCases = this.pos2_bishop(i, piece.color, pieceCases, sim);  
+            break;
+          } 
+          case 'queen': { 
+            pCases = this.pos2_rook(i, piece.color, pieceCases, sim).concat(this.pos2_bishop(i, piece.color, pieceCases, sim)); 
+            break;
+          } 
+          case 'king': { 
+            pCases = this.pos2_king(i, piece.color, false, pieceCases, sim); // à changer le booléen asap
+            break;
+          } 
+        }
+        for (var list of pCases) {
+          casesOut.push(list[1]);
+        }
+      }
+    }
+    var check: boolean;
+    check = this.isChecked(color, pieceCases, casesOut);
+    var threatsResults: [number[], boolean] = [casesOut, check];
+
+    return threatsResults;
+  }
+
+  isChecked(color: "white" | "black", pieceCases: (Piece|null)[], casesThreatened :number[]) {
+    for (var c of casesThreatened) {
+      if(pieceCases[c]?.type === 'king' && pieceCases[c]?.color === color) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  calculMoves(color: "white" | "black") {
+    var moves: number[] = []
+    for (var i = 0; i < this.pieceCases.length; i++) {
+      var p = this.pieceCases[i];
+      if (p && p.color === color) {
+        if(this.availableMovesFrom(i, this.pieceCases).length) {
+          moves.push(i);
+        }
+      }
+    }
+    return moves;
+  }
+
+  promoteTo(choice: Piece["type"]) {
+    if(this.nbPromote != -1) {
+      var piecePromoted = this.pieceCases[this.nbPromoteFrom]
+      if(piecePromoted) {
+        var color = piecePromoted.color;
+        this.pieceCases[this.nbPromote] = {type: choice, color: color};
+        this.pieceCases[this.nbPromoteFrom] = null;
+        this.promotionWait = false;
+      }
+    }
+    this.refreshCases.next([this.nbPromote, this.nbPromoteFrom]);
+    this._promotePawn.next(-1);
+    this.endTurn.next(this.getCaseName(this.nbPromote).toString()+"=" + this.textFromPiece(choice));
+
+    this.nbPromote = -1;
+    this.nbPromoteFrom = -1;
+  }
+
+  setPromoteChoice(choice: Piece["type"]) {
+    this._promoteChoice.next(choice);
   }
 
   pos2_bishop (pos1: number, color: 'white'|'black', cases: (Piece|null)[], sim?: boolean) {
@@ -250,65 +640,21 @@ export class CasesService {
       var n = this.tab120[this.tab64[pos1]-10];
       if(n != -1) {
         if(this.isEmpty(n, cases)) {
-          /*
-          # If the PAWN has arrived to rank 8 (square 0 to 7), 
-                    if(n<8):
-                        # it will be promoted
-                        liste.append((pos1,n,'q'))
-                        liste.append((pos1,n,'r'))
-                        liste.append((pos1,n,'n'))
-                        liste.append((pos1,n,'b'))
-                    else:
-                        liste.append((pos1,n,''))*/
           if(sim || this.simulatePosition(pos1, n)) {
-            availableMoves.push([pos1, n, '']);
+            if(n < 8) {
+              availableMoves.push([pos1, n, 'prom']);
+            }
+            else {
+              availableMoves.push([pos1, n, '']);
+            }
           }
         }
       }
       if(pos1 <=55 && pos1 >= 48) { // first row
         if(this.isEmpty(pos1-8, cases) && this.isEmpty(pos1-16, cases)) {
           if(sim || this.simulatePosition(pos1, pos1-16)) {
-            availableMoves.push([pos1, pos1-16, '']);
+            availableMoves.push([pos1, pos1-16, '2pawn']);
           }
-        }
-      }
-
-      //Capture upper left
-      var n = this.tab120[this.tab64[pos1]-11];
-      if(n != -1) {
-        if(this.hasEnemyPiece(n, color, cases) /* OU N EST UNE CASE D'EN PASSANT*/) {
-                    /*
-          # If the PAWN has arrived to rank 8 (square 0 to 7), 
-                    if(n<8):
-                        # it will be promoted
-                        liste.append((pos1,n,'q'))
-                        liste.append((pos1,n,'r'))
-                        liste.append((pos1,n,'n'))
-                        liste.append((pos1,n,'b'))
-                    else:
-                        liste.append((pos1,n,''))*/
-            if(sim || this.simulatePosition(pos1, n)) {
-              availableMoves.push([pos1, n, '']);
-            }
-        }
-      }
-      //Capture upper right
-      var n = this.tab120[this.tab64[pos1]-9];
-      if(n != -1) {
-        if(this.hasEnemyPiece(n, color, cases) /* OU N EST UNE CASE D'EN PASSANT*/) {
-                    /*
-          # If the PAWN has arrived to rank 8 (square 0 to 7), 
-                    if(n<8):
-                        # it will be promoted
-                        liste.append((pos1,n,'q'))
-                        liste.append((pos1,n,'r'))
-                        liste.append((pos1,n,'n'))
-                        liste.append((pos1,n,'b'))
-                    else:
-                        liste.append((pos1,n,''))*/
-            if(sim || this.simulatePosition(pos1, n)) {
-              availableMoves.push([pos1, n, '']);
-            }
         }
       }
     }
@@ -316,65 +662,104 @@ export class CasesService {
       var n = this.tab120[this.tab64[pos1]+10];
       if(n != -1) {
         if(this.isEmpty(n, cases)) {
-          /*
-          # If the PAWN has arrived to rank 8 (square 0 to 7), 
-                    if(n>55):
-                        # it will be promoted
-                        liste.append((pos1,n,'q'))
-                        liste.append((pos1,n,'r'))
-                        liste.append((pos1,n,'n'))
-                        liste.append((pos1,n,'b'))
-                    else:
-                        liste.append((pos1,n,''))*/
           if(sim || this.simulatePosition(pos1, n)) {
-            availableMoves.push([pos1, n, '']);
+            if(n > 55) {
+              availableMoves.push([pos1, n, 'prom'])
+            }
+            else {
+              availableMoves.push([pos1, n, '']);
+            }          
           }
         }
       }
       if(pos1 <=15 && pos1 >= 8) { // first row
         if(this.isEmpty(pos1+8, cases) && this.isEmpty(pos1+16, cases)) {
           if(sim || this.simulatePosition(pos1, pos1+16)) {
-            availableMoves.push([pos1, pos1+16, '']);
+            availableMoves.push([pos1, pos1+16, '2pawn']);
           }
         }
       }
+    }
+    return availableMoves.concat(this.capture_pawn(pos1, color, cases));
+  }
 
+  capture_pawn(pos1: number, color: 'white'|'black', cases: (Piece|null)[], sim?: boolean) {
+    var availableMoves: [number,number,string][] = [];
+    if (color === 'white') {
+      //Capture upper left
+      var n = this.tab120[this.tab64[pos1]-11];
+      if(n != -1) {
+        if(this.hasEnemyPiece(n, color, cases)) {
+          if(sim || this.simulatePosition(pos1, n)) {
+            if(n < 8) {
+              availableMoves.push([pos1, n, 'prom'])
+            }
+            else {
+              availableMoves.push([pos1, n, '']);
+            }                  
+          }
+        }
+        else if (n == this.enPassant){
+          if(sim || this.simulatePosition(pos1, n)) {
+            availableMoves.push([pos1, n, 'ep']);
+          }                  
+        }
+      }
+      //Capture upper right
+      var n = this.tab120[this.tab64[pos1]-9];
+      if(n != -1) {
+        if(this.hasEnemyPiece(n, color, cases)) {
+          if(sim || this.simulatePosition(pos1, n)) {
+            if(n < 8) {
+              availableMoves.push([pos1, n, 'prom'])
+            }
+            else {
+              availableMoves.push([pos1, n, '']);
+            }                  
+          }
+        }
+        else if (n == this.enPassant){
+          if(sim || this.simulatePosition(pos1, n)) {
+            availableMoves.push([pos1, n, 'ep']);
+          }                  
+        }
+      }
+    }
+    else if (color === 'black') {
       //Capture bottom left
       var n = this.tab120[this.tab64[pos1]+11];
       if(n != -1) {
-        if(this.hasEnemyPiece(n, color, cases) /* OU N EST UNE CASE D'EN PASSANT*/) {
-                    /*
-          # If the PAWN has arrived to rank 8 (square 0 to 7), 
-                    if(n>55):
-                        # it will be promoted
-                        liste.append((pos1,n,'q'))
-                        liste.append((pos1,n,'r'))
-                        liste.append((pos1,n,'n'))
-                        liste.append((pos1,n,'b'))
-                    else:
-                        liste.append((pos1,n,''))*/
+        if(this.hasEnemyPiece(n, color, cases)) {
           if(sim || this.simulatePosition(pos1, n)) {
-            availableMoves.push([pos1, n, '']);
-          }
+            if(n > 55) {
+              availableMoves.push([pos1, n, 'prom'])
+            }
+            else {
+              availableMoves.push([pos1, n, '']);
+            }           }
+        }
+        else if (n == this.enPassant){
+          if(sim || this.simulatePosition(pos1, n)) {
+            availableMoves.push([pos1, n, 'ep']);
+          }                  
         }
       }
       //Capture bottom right
       var n = this.tab120[this.tab64[pos1]+9];
       if(n != -1) {
-        if(this.hasEnemyPiece(n, color, cases) /* OU N EST UNE CASE D'EN PASSANT*/) {
-                    /*
-          # If the PAWN has arrived to rank 8 (square 0 to 7), 
-                    if(n>55):
-                        # it will be promoted
-                        liste.append((pos1,n,'q'))
-                        liste.append((pos1,n,'r'))
-                        liste.append((pos1,n,'n'))
-                        liste.append((pos1,n,'b'))
-                    else:
-                        liste.append((pos1,n,''))*/
+        if(this.hasEnemyPiece(n, color, cases)) {
           if(sim || this.simulatePosition(pos1, n)) {
-            availableMoves.push([pos1, n, '']);
-          }
+            if(n > 55) {
+              availableMoves.push([pos1, n, 'prom'])
+            }
+            else {
+              availableMoves.push([pos1, n, '']);
+            }           }
+        }
+        else if (n == this.enPassant){
+          if(sim || this.simulatePosition(pos1, n)) {
+            availableMoves.push([pos1, n, 'ep']);
+          }                  
         }
       }
     }
@@ -446,303 +831,5 @@ export class CasesService {
     }
 
     return availableMoves;
-  }
-
-  movePiece(pos1: number, pos2: number) {
-    var canMove = this.canMoveTo(pos1, pos2);
-    if (canMove[0]) {
-      var piece = this.getPiece(pos1, this.pieceCases);
-      var piece2 = this.pieceCases[pos2]
-      var newMove = '';
-
-      if(piece) {
-        if(canMove[1] != '') { // special move
-          switch(canMove[1]) {
-            case 'OO': {
-              this.pieceCases[pos2] = this.pieceCases[pos1];
-              this.pieceCases[pos1] = null;
-              this.pieceCases[pos2-1] = this.pieceCases[pos2+1];
-              this.pieceCases[pos2+1] = null;
-
-              this.refreshCases.next([pos1, pos2, pos2-1, pos2+1]);
-              newMove = 'O-O';
-              break;
-            }
-            case 'OOO': {
-              this.pieceCases[pos2] = this.pieceCases[pos1];
-              this.pieceCases[pos1] = null;
-              this.pieceCases[pos2+1] = this.pieceCases[pos2-2];
-              this.pieceCases[pos2-2] = null;
-
-              this.refreshCases.next([pos1, pos2, pos2+1, pos2-2]);
-              newMove = 'O-O-O';
-              break;
-            }
-
-            default : { // convert a pawn
-              
-            }
-          }
-        }
-        else { // classic move
-          newMove = this.textFromPiece(piece)+this.getCaseName(pos2);
-          this.movesPlayed.push(newMove);
-          this._movePlayed.next(newMove);
-  
-          if(piece2) {
-            this.eliminatePiece(piece2);
-          }
-          this.pieceCases[pos2] = this.pieceCases[pos1];
-          this.pieceCases[pos1] = null;
-          this.refreshCases.next([pos1, pos2]);
-
-        }
-
-        if((this.whiteCanOO || this.whiteCanOOO) && piece.type === 'king' && piece.color === 'white') {
-          this.whiteCanOO = false;
-          this.whiteCanOOO = false;
-        } else if((this.blackCanOO || this.blackCanOOO) && piece.type === 'king' && piece.color === 'black') {
-          this.blackCanOO = false;
-          this.blackCanOOO = false;
-        }
-
-        if((this.whiteCanOO || this.whiteCanOOO) && piece.type === 'rook' && piece.color === 'white') {
-          if(pos1==56) {
-            this.whiteCanOOO = false;
-          } else if(pos1==63) {
-            this.whiteCanOO = false;
-          }
-        } else if((this.blackCanOO || this.blackCanOOO) && piece.type === 'rook' && piece.color === 'black') {
-          if(pos1==0) {
-            this.blackCanOOO = false;
-          } else if(pos1==7) {
-            this.blackCanOO = false;
-          }
-        }
-
-        this.movesPlayed.push(newMove);
-        this._movePlayed.next(newMove);
-        
-        this.colorToMove = this.colorToMove === 'white' ? 'black' : 'white';
-        this._colorToMove.next(this.colorToMove);
-        this.unSelectCase();
-
-        // Calcul des mvts possibles
-        this.possibleMoves = this.calculMoves(this.colorToMove);
-        if(this.possibleMoves.length < 1) {
-          if(this.refreshThreats(this.colorToMove, this.pieceCases)[1]) {
-            if(this.colorToMove === "white") {
-              console.log('BLACK WON');
-            } else {
-              console.log('WHITE WON');
-            }
-          }
-          else {
-            console.log('PAT');
-          }
-        }
-
-        // Calcul des cases attaquées
-        this.whiteAttackedCases = this.casesAttacked('white');
-        this.blackAttackedCases = this.casesAttacked('black');
-        this._whiteAttackedCases.next(this.whiteAttackedCases);
-        this._blackAttackedCases.next(this.blackAttackedCases);
-      }
-      return true;
-    }
-    return false;
-  }
-
-  availableMovesFrom(pos: number, cases: (Piece|null)[]) {
-    var piece = this.getPiece(pos, cases);
-    if(piece) {
-      switch(piece.type) { 
-        case 'pawn': { 
-          return this.pos2_pawn(pos, piece.color, cases); 
-        } 
-        case 'rook': { 
-          return this.pos2_rook(pos, piece.color, cases); 
-        } 
-        case 'knight': { 
-          return this.pos2_knight(pos, piece.color, cases); 
-        } 
-        case 'bishop': { 
-          return this.pos2_bishop(pos, piece.color, cases); 
-        } 
-        case 'queen': { 
-          return this.pos2_rook(pos, piece.color, cases).concat(this.pos2_bishop(pos, piece.color, cases)); 
-        } 
-        case 'king': { 
-          return this.pos2_king(pos, piece.color, false, cases); // à changer le booléen asap
-        } 
-        default: { 
-          return [];
-        } 
-      } 
-    }
-    return [];
-  }
-
-  canMoveTo(pos1: number, pos2: number) {
-    var output: [boolean, string] = [false, ''];
-    if(this.getPiece(pos1, this.pieceCases)?.color === this.colorToMove) {
-      for (var k of this.availableMovesFrom(pos1, this.pieceCases)) {
-        if (k[1] === pos2) {
-          output[0] = true;
-          output[1] = k[2];
-          return output;
-        }
-      }
-    }
-    return output;
-  }
-
-  textFromPiece(piece: Piece) {
-    if(piece) {
-      switch(piece.type) { 
-        case 'pawn': { 
-          return ''; 
-        } 
-        case 'rook': { 
-          return 'R'; 
-        } 
-        case 'knight': { 
-          return 'N'; 
-        } 
-        case 'bishop': { 
-          return 'B'; 
-        } 
-        case 'queen': { 
-          return 'Q'; 
-        } 
-        case 'king': { 
-          return 'K';
-        } 
-        default: { 
-          return [];
-        } 
-      } 
-    }
-    return '';
-  }
-
-  eliminatePiece(piece: Piece) {
-    this._pieceCaptured.next(piece);
-    this.piecesCaptured[piece.color === 'white'? 0 : 1].push(piece);
-  }
-
-  casesAttacked(color: "white" | "black") { // Returns the cases of the colored pieces being threatened
-    var cases: number[] = [];
-    var check: boolean;
-
-    var threatsResult = this.refreshThreats(color, this.pieceCases);
-    cases = threatsResult[0];
-    check = threatsResult[1];
-    
-    if(check) {
-      if(color === "white") {
-        this.whiteCheck = true;
-        this._whiteCheck.next(true);
-      }
-      if(color === "black") {
-        this.blackCheck = true;
-        this._blackCheck.next(true);
-      }
-    }
-    else {
-      if(color === "white") {
-        this.whiteCheck = false;
-        this._whiteCheck.next(false);
-      }
-      if(color === "black") {
-        this.blackCheck = false;
-        this._blackCheck.next(false);
-      }
-    }
-    return cases;
-  }
-  
-  simulatePosition(pos1: number, pos2: number) {
-    var piece1 = this.getPiece(pos1, this.pieceCases);
-    if(piece1) {
-      var color = piece1.color;
-      var pieceCasesCopy: (Piece|null)[] = Object.assign([], this.pieceCases);
-      pieceCasesCopy[pos2] = pieceCasesCopy[pos1];
-      pieceCasesCopy[pos1] = null;
-      
-      var threatsResult = this.refreshThreats(color, pieceCasesCopy, true);
-      if(threatsResult[1]) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  refreshThreats(color: "white" | "black", pieceCases: (Piece|null)[], sim?: boolean) {
-    var casesOut: number[] = [];
-    var pCases: [number,number,string][] = []
-
-    for (var i = 0; i < pieceCases.length; i++) {
-      var piece = pieceCases[i];
-      if(piece && piece?.color != color) {
-        pCases = [];
-        switch(piece.type) {
-          case 'pawn': {
-            // faire une fct spéciale pour attaque de pion
-            break;
-          }
-          case 'rook': { 
-            pCases = this.pos2_rook(i, piece.color, pieceCases, sim); 
-            break;
-          } 
-          case 'knight': { 
-            pCases = this.pos2_knight(i, piece.color, pieceCases, sim); 
-            break;
-          } 
-          case 'bishop': { 
-            pCases = this.pos2_bishop(i, piece.color, pieceCases, sim);  
-            break;
-          } 
-          case 'queen': { 
-            pCases = this.pos2_rook(i, piece.color, pieceCases, sim).concat(this.pos2_bishop(i, piece.color, pieceCases, sim)); 
-            break;
-          } 
-          case 'king': { 
-            pCases = this.pos2_king(i, piece.color, false, pieceCases, sim); // à changer le booléen asap
-            break;
-          } 
-        }
-        for (var list of pCases) {
-          casesOut.push(list[1]);
-        }
-      }
-    }
-    var check: boolean;
-    check = this.isChecked(color, pieceCases, casesOut);
-    var threatsResults: [number[], boolean] = [casesOut, check];
-
-    return threatsResults;
-  }
-
-  isChecked(color: "white" | "black", pieceCases: (Piece|null)[], casesThreatened :number[]) {
-    for (var c of casesThreatened) {
-      if(pieceCases[c]?.type === 'king' && pieceCases[c]?.color === color) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  calculMoves(color: "white" | "black") {
-    var moves: number[] = []
-    for (var i = 0; i < this.pieceCases.length; i++) {
-      var p = this.pieceCases[i];
-      if (p && p.color === color) {
-        if(this.availableMovesFrom(i, this.pieceCases).length) {
-          moves.push(i);
-        }
-      }
-    }
-    return moves;
   }
 }

@@ -12,4 +12,11 @@
     </div>
 </div>
 
+<div *ngIf="promotion != 'none'">
+    <app-piece [piece]="knightPiece" (click)="promote(knightPiece.type)"></app-piece>
+    <app-piece [piece]="bishopPiece" (click)="promote(bishopPiece.type)"></app-piece>
+    <app-piece [piece]="rookPiece" (click)="promote(rookPiece.type)"></app-piece>
+    <app-piece [piece]="queenPiece" (click)="promote(queenPiece.type)"></app-piece>
+</div>
+
 
