@@ -52,6 +52,8 @@ export class CasesService {
   promotionWait = false;
   choiceSubscription: Subscription | null = null;
 
+  _ggEnd = new Subject<'black' | 'white' | 'pat' | 'none'>(); //stores the winner
+
   tab120 = [
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -368,13 +370,16 @@ export class CasesService {
         newMove = newMove + '#';
         checkMateEndGame = true;
         if(this.colorToMove === "white") {
+          this._ggEnd.next("black");
           console.log('BLACK WON');
         } else {
+          this._ggEnd.next("white");
           console.log('WHITE WON');
         }
       }
       else {
         console.log('PAT');
+        this._ggEnd.next("pat");
       }
     }
     // Calcul des cases attaquées

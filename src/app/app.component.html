@@ -5,6 +5,7 @@
     </mat-card>
     <div class="board-container">
         <app-board></app-board>
+        <div *ngIf="winner!='none'" class="win-display">{{gg[winner]}}</div>
     </div>
     <mat-card class="game-infos">
         <span class="trait">
@@ -16,3 +17,4 @@
         <app-piece *ngFor="let piece of piecesCaptured" [piece]="piece" size="small"></app-piece>
     </mat-card>
 </div>
+

@@ -16,6 +16,9 @@ export class AppComponent implements OnInit{
   whiteCheck = 'none';
   blackCheck = 'none';
 
+  winner: 'black' | 'white' | 'pat' | 'none' = 'white';//'none';
+  gg = {'black': 'Black won !', 'white': 'White won !', 'pat': "Draw by stalemate", 'none': ''};
+
   @HostListener('click', ['$event.target'])
   onClick(target:any) {
     if(target.className.length) {
@@ -47,6 +50,15 @@ export class AppComponent implements OnInit{
     this.casesService._blackCheck.subscribe((check) => {
       this.blackCheck = check ? 'black' : 'none';
     });
+
+    this.casesService._ggEnd.subscribe((winner) => {
+      this.endGame(winner);
+    })
+  }
+
+  endGame(winner: 'black' | 'white' | 'pat' | 'none') {
+    console.log(winner);
+    this.winner = winner;
   }
 
 }

@@ -43,8 +43,13 @@ $antilope-theme: mat.define-light-theme((
 .board-container {
     min-width: 50%;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     padding: 15px;
+}
+
+.win-display {
+  margin: 10px 0;
 }
 
 .game-infos {
