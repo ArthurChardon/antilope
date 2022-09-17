@@ -1,0 +1,81 @@
+$case-side: 90px;
+
+.row-div {
+    display: flex;
+}
+
+.top-infos {
+    background-color: rgba(46, 0, 20, 0.25);
+    color: white;
+    width: calc(8 * $case-side);
+    height: 30px;
+    margin-left: 30px;  
+    display: flex;
+}
+
+.nb-infos {
+    height: $case-side;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.left-infos {
+    background-color: rgba(46, 0, 20, 0.25);
+    color: white;
+    width: 30px;
+    height: calc(8 * $case-side);
+}
+
+.letter-infos {
+    width: $case-side;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.promote-container-master {
+    display: flex;
+    width:100%;
+    justify-content: center;
+}
+
+.promote-container {
+    background-color: rgba(46, 0, 20, 0.25);
+    border-radius: 25px;
+    display: flex;
+    padding: 12px 20px;
+    margin-top: 10px;
+    width:60%;
+    justify-content: space-around;
+}
+
+$color-play-size: 30px;
+.color-to-move {
+
+    width: $color-play-size;
+    height: $color-play-size;
+
+    position: absolute;
+    left: 0;
+    top: 0;
+
+
+	&.blackMove {
+		background-color: black;
+		transform: rotateY(0deg);
+	}
+	&.whiteMove {
+		background-color: white;
+		transform: rotateY(180deg);
+	}
+	transition: background-color 0.5s ease, transform 0.5s ease;
+}
+
+.move-container {
+    position: relative;
+}
+
+.df {
+    display: flex;
+}

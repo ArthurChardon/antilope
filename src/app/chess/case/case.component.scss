@@ -1,6 +1,8 @@
+$case-side: 90px;
+
 div {
-    width: 80px;
-    height: 80px;
+    width: $case-side;
+    height: $case-side;
     background-color: rgb(11, 57, 84);
     color: white;
     /*&:hover {
@@ -25,8 +27,8 @@ div {
     border-style: solid;
     border-width: 3px;
     border-color: red;
-    width: 74px;
-    height: 74px;
+    width: calc($case-side - 2*3px);
+    height: calc($case-side - 2*3px);
 }
 
 .available {

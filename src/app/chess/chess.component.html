@@ -1,0 +1,19 @@
+<div class="page-container">
+    <div class="left-container">
+        <mat-card class="game-infos">
+            <mat-card-title>Game infos</mat-card-title>
+            <span *ngFor="let move of moves">{{move}} </span>
+        </mat-card>
+    </div>
+    
+    <div class="board-container">
+        <app-board></app-board>
+        <div *ngIf="winner!='none'" class="win-display">{{gg[winner]}}</div>
+    </div>
+    <mat-card class="game-infos">
+        <span *ngIf="whiteCheck!='none'">{{whiteCheck}} check !</span>
+        <span *ngIf="blackCheck!='none'">{{blackCheck}} check !</span>
+        <app-piece *ngFor="let piece of piecesCaptured" [piece]="piece" size="small"></app-piece>
+    </mat-card>
+</div>
+

@@ -7,9 +7,10 @@ import { Piece } from '../piece/piece';
 @Component({
   selector: 'app-board',
   templateUrl: './board.component.html',
-  styleUrls: ['./board.component.css']
+  styleUrls: ['./board.component.scss']
 })
 export class BoardComponent implements OnInit {
+  colorToMove: 'black' | 'white' = 'white';
 
   cases: number[][] = []
   boardRows = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
@@ -22,13 +23,16 @@ export class BoardComponent implements OnInit {
 
   promotion: 'white' | 'black' | 'none' = 'none';
 
-  constructor(private casesServices: CasesService) {}
+  constructor(private casesService: CasesService) {}
 
   ngOnInit(): void {
     this.initCases();
-    this.casesServices._promotePawn.subscribe((nb) => {
+    this.casesService._promotePawn.subscribe((nb) => {
       this.promoteSet(nb);
-    })
+    });
+    this.casesService._colorToMove.subscribe((color) => {
+      this.colorToMove = color;
+    });
   }
 
   initCases() {
@@ -42,7 +46,7 @@ export class BoardComponent implements OnInit {
   }
 
   promoteSet(nb: number) {
-    var color = this.casesServices.getBoardPiece(nb)?.color;
+    var color = this.casesService.getBoardPiece(nb)?.color;
     this.promotion = color ? color : 'none';
     if(this.promotion != 'none') {
       this.knightPiece.color = this.promotion;
@@ -53,7 +57,7 @@ export class BoardComponent implements OnInit {
   }
 
   promote(choice: Piece["type"]) {
-    this.casesServices.setPromoteChoice(choice);
+    this.casesService.setPromoteChoice(choice);
   }
 
 }

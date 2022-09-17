@@ -86,7 +86,7 @@ export class CasesService {
   constructor() {
     this.initCases();
     this.initPieces();
-    this.setupPiecesCustom();
+    //this.setupPiecesCustom();
 
     this.endTurn.subscribe((move) => {
       this.endMove(move);
@@ -156,9 +156,9 @@ export class CasesService {
     // //this.pieceCases[35] = {type: 'king', color: 'white'};
     // this.pieceCases[36] = {type: 'queen', color: 'white'};
     // this.pieceCases[36] = {type: 'pawn', color: 'white'};
-    // this.pieceCases[12] = {type: 'pawn', color: 'white'};
-    // this.pieceCases[13] = {type: 'pawn', color: 'white'};
-    // this.pieceCases[41] = {type: 'pawn', color: 'black'};
+     this.pieceCases[12] = {type: 'pawn', color: 'white'};
+     this.pieceCases[13] = {type: 'pawn', color: 'white'};
+     this.pieceCases[41] = {type: 'pawn', color: 'black'};
   }
 
   getCaseName (numb: number) {

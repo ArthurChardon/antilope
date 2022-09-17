@@ -1,0 +1,161 @@
+$color-2c:  #2c3e50; 
+
+.box {
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+	margin: 0 10px;
+	box-shadow: inset 0 0 0 3px $color-2c;
+	background: rgba(255,255,255,1);
+	color: $color-2c;
+	transition: background 0.4s 0.5s;
+    &.big {
+        width: 300px;
+        height: 460px;
+    }
+    &.small {
+        width: 150px;
+        height: 230px;
+    }
+}
+
+.box:hover {
+	background: $color-2c;
+	transition-delay: 0s;
+}
+
+.box h3 {
+	font-family: "Segoe UI", cursive;
+	margin: 0;
+	font-weight: 400;
+}
+
+.box.big h3 {
+    font-size: 180px;
+}
+.box.small h3 {
+    font-size: 90px;
+}
+
+.box span {
+	display: block;
+	font-weight: 400;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	padding: 5px;
+    white-space:nowrap;
+}
+
+.box.big span {
+    font-size: 13px;
+}
+.box.small span {
+    font-size: 10px;
+}
+
+.box h3,
+.box span {
+	transition: color 0.4s ease 0.5s, right 0.4s ease;
+    position: absolute;
+    text-align: right;
+    left: 5px;
+    right: 100%;
+}
+
+.box:hover h3,
+.box:hover span {
+	transition: color 0.4s ease, right 0.4s ease;
+	color: #fff;
+    right: 5px;
+}
+
+.box .texts {
+    position: relative;
+    width: 100%;
+
+    &.largeT {
+        flex-grow: 6;
+    }
+
+    &.mediumT {
+        flex-grow: 3;
+    }
+
+    &.smallT {
+        flex-grow: 1;
+    }
+}
+
+.box .allTexts {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+
+.box svg {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.box svg line {
+	stroke-width: 3;
+	stroke: #ecf0f1;
+	fill: none;
+	transition: all .8s ease-in-out;
+}
+
+.box:hover svg line {
+	transition-delay: 0.1s;
+}
+
+.box.big svg line.top,
+.box.big svg line.bottom {
+    stroke-dasharray: 330 240;
+}
+.box.small svg line.top,
+.box.small svg line.bottom {
+    stroke-dasharray: 165 120; 
+}
+
+.box.big svg line.left,
+.box.big svg line.right {
+	stroke-dasharray: 490 400;
+}
+.box.small svg line.left,
+.box.small svg line.right {
+    stroke-dasharray: 245 200; 
+}
+
+.box.big:hover svg line.top {
+    transform: translateX(-600px); 
+}
+.box.small:hover svg line.top {
+    transform: translateX(-300px); 
+}
+
+.box.big:hover svg line.bottom {
+    transform: translateX(600px); 
+}
+.box.small:hover svg line.bottom {
+    transform: translateX(300px); 
+}
+
+.box.big:hover svg line.left {
+    transform: translateY(920px); 
+}
+.box.small:hover svg line.left {
+    transform: translateY(460px); 
+}
+
+.box.big:hover svg line.right {
+    transform: translateY(-920px); 
+}
+.box.small:hover svg line.right {
+    transform: translateY(-460px); 
+}
+
+
