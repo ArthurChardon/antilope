@@ -11,7 +11,8 @@ import { Piece } from './piece/piece';
 export class ChessComponent implements OnInit{
   title = 'Chess Antilope';
   moves : string[] = [];
-  piecesCaptured: Piece[] = [];
+  blackCaptured: Piece[] = [];
+  whiteCaptured: Piece[] = [];
 
   whiteCheck = 'none';
   blackCheck = 'none';
@@ -36,7 +37,11 @@ export class ChessComponent implements OnInit{
     });
 
     this.casesService._pieceCaptured.subscribe((piece) => {
-      this.piecesCaptured.push(piece);
+      if(piece.color === 'black') {
+        this.blackCaptured.push(piece);
+      } else if(piece.color === 'white') {
+        this.whiteCaptured.push(piece);
+      }
     });
 
     this.casesService._whiteCheck.subscribe((check) => {

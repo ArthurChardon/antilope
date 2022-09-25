@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { range } from 'rxjs';
 import { CasesService } from '../cases.service';
-import { PieceComponent } from '../piece/piece.component';
 import { Piece } from '../piece/piece';
 
 @Component({
