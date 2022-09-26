@@ -14,6 +14,8 @@ export class CaseComponent implements OnInit {
   available = false;
 
   attacked = false;
+  checked = false;
+  mated = false;
 
   otherSelected: number = -1;
 
@@ -21,19 +23,19 @@ export class CaseComponent implements OnInit {
   name = 'null';
   caseBlanche = false;
 
-  constructor(private casesServices: CasesService) {}
+  constructor(private casesService: CasesService) {}
 
   ngOnInit(): void {
     if(this.numb > -1) {
-      this.name = this.casesServices.getCaseName(this.numb);
-      this.caseBlanche = this.casesServices.getCaseColor(this.numb) === 'white';
-      this.piece = this.casesServices.getBoardPiece(this.numb);
+      this.name = this.casesService.getCaseName(this.numb);
+      this.caseBlanche = this.casesService.getCaseColor(this.numb) === 'white';
+      this.piece = this.casesService.getBoardPiece(this.numb);
     }
-    this.casesServices.selectedCase.subscribe((n) => {
+    this.casesService.selectedCase.subscribe((n) => {
       this.selected = n === this.numb;
       this.otherSelected = n;
     });
-    this.casesServices.availableCases.subscribe((n) => {
+    this.casesService.availableCases.subscribe((n) => {
       this.available = false;
       for(var k of n) {
         if (this.numb == k[1]) {
@@ -42,14 +44,14 @@ export class CaseComponent implements OnInit {
         }
       }
     })
-    this.casesServices.refreshCases.subscribe((n) => {
+    this.casesService.refreshCases.subscribe((n) => {
       for(var k of n) {
         if(this.numb == k) {
           this.refreshCase();
         }
       }
     })
-    this.casesServices._whiteAttackedCases.subscribe((n) => {
+    this.casesService._whiteAttackedCases.subscribe((n) => {
       for(var k of n) {
         if(this.numb == k) {
           this.attacked = true;
@@ -57,28 +59,56 @@ export class CaseComponent implements OnInit {
         }
       }
     })
+    this.casesService._blackCheck.subscribe((n) => {
+      if(!this.piece) {
+        this.checked = false;
+      }
+      if(n && this.piece?.type === 'king' && this.piece.color === 'black') {
+        this.checked = true;
+      }
+      else if(this.piece?.color === 'black') {
+        this.checked = false;
+      }
+    })
+    this.casesService._whiteCheck.subscribe((n) => {
+      if(!this.piece) {
+        this.checked = false;
+      }
+      if(n && this.piece?.type === 'king' && this.piece.color === 'white') {
+        this.checked = true;
+      }
+      else if(this.piece?.color === 'white') {
+        this.checked = false;
+      }
+    })
+    this.casesService._ggEnd.subscribe((winner) => {
+      if(this.piece?.type === 'king' && this.piece.color != winner) {
+        this.checked = false;
+        this.mated = true;
+      }
+    })
   }
 
   refreshCase() {
     if(this.numb > -1) {
-      this.name = this.casesServices.getCaseName(this.numb);
-      this.piece = this.casesServices.getBoardPiece(this.numb);
+      this.name = this.casesService.getCaseName(this.numb);
+      this.piece = this.casesService.getBoardPiece(this.numb);
     }
   }
 
   clickCase() {
     if(this.selected) {
       this.selected = false;
-      this.casesServices.unSelectCase();
+      this.casesService.unSelectCase();
     }
     else {
-      if(this.otherSelected != this.numb && this.casesServices.getBoardPiece(this.otherSelected)) { // moving piece
-        if(this.casesServices.movePiece(this.otherSelected, this.numb))
+      if(this.otherSelected != this.numb && this.casesService.getBoardPiece(this.otherSelected)) { // moving piece
+        if(this.casesService.movePiece(this.otherSelected, this.numb))
         {
           return;
         }
       }
-      this.casesServices.selectCase(this.numb);
+      this.casesService.selectCase(this.numb);
     }
   }
 

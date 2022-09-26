@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Piece } from './piece/piece';
-import { PieceComponent } from './piece/piece.component';
-import { Observable, of, Subject, Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'

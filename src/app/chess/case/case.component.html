@@ -1,5 +1,8 @@
-<div class="caseContainer" [ngClass]="{'blanche' : caseBlanche, 'selected': selected, 'available': available, 'attacked': attacked}" (click)="clickCase()">
-    <app-piece *ngIf="piece" [piece]="piece"></app-piece>
+<div class="caseContainer" [ngClass]="{'blanche' : caseBlanche, 'selected': selected, 'attacked': attacked, 'check': checked}" (click)="clickCase()">
+    <div *ngIf="checked" class="checked decorator"></div>
+    <div *ngIf="available" class="available decorator"></div>
+    <div *ngIf="mated" class="mated decorator"></div>
+    <app-piece *ngIf="piece" [piece]="piece" class="piece"></app-piece>
     <!-- {{numb}} -->
 </div>
 

@@ -15,8 +15,8 @@
     </div>
 </div>
 
-<div *ngIf="promotion != 'none'" class="promote-container-master">
-    <div class="promote-container">
+<div class="promote-container-master" [ngClass]="{'set-promote' : promotion != 'none'}">
+    <div *ngIf="promotion != 'none'" class="promote-container">
         <app-piece [piece]="knightPiece" (click)="promote(knightPiece.type)"></app-piece>
         <app-piece [piece]="bishopPiece" (click)="promote(bishopPiece.type)"></app-piece>
         <app-piece [piece]="rookPiece" (click)="promote(rookPiece.type)"></app-piece>

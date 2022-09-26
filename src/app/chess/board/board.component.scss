@@ -4,6 +4,10 @@ $case-side: 95px;
     display: flex;
 }
 
+.board-div {
+    z-index: 2;
+}
+
 .top-infos {
     background-color: rgba(46, 0, 20, 0.25);
     color: white;
@@ -38,6 +42,12 @@ $case-side: 95px;
     display: flex;
     width:100%;
     justify-content: center;
+    transform: translateY(-100px);
+    z-index: 1;
+    &.set-promote {
+        transform: translateY(0px);
+    }
+    transition: transform 0.8s;
 }
 
 .promote-container {

@@ -48,26 +48,55 @@ $antilope-theme: mat.define-light-theme((
     align-items: center;
 }
 
+.board-card {
+  height: fit-content;
+}
+
 .win-display {
   margin: 10px 0;
 }
 
 .game-infos {
-    height: fit-content;
-    min-height: 680px;
     background-color: rgba(46, 0, 20, 0.25);
     margin: 15px;
 }
 
 .right-infos {
+  height: fit-content;
+  min-height: 630px;
   width: 350px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
 }
 
 .left-infos {
+  height: fit-content;
+  min-height: 680px;
   width: 350px;
+  display: flex;
+  flex-direction: column;
+}
+
+.left-infos-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+@import url('http://fonts.cdnfonts.com/css/apple-chancery');
+.left-infos-title-text {
+  font-family: 'Apple Chancery', cursive;
+  font-size: 40px;
+  line-height: 40px;
+  font-weight: bold;
+}
+
+.side-icon {
+  margin-right: 15px;
+}
+
+.moves-text {
+  font-family: 'Courier', monospace;
+  font-size: 18px;
+  font-weight: bold;
 }
 
 .side-container {
@@ -80,4 +109,11 @@ $antilope-theme: mat.define-light-theme((
 .captured-container {
   width: 100%;
   height: 50%;
+}
+
+.captured-both {
+  min-height: inherit;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }

@@ -21,20 +21,44 @@ div {
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
 }
 
 .selected {
     border-style: solid;
     border-width: 3px;
-    border-color: red;
+    border-color: #01a3a4;
     width: calc($case-side - 2*3px);
     height: calc($case-side - 2*3px);
 }
 
-.available {
-    background-color: red;
+.decorator {
+    border-radius: 50%;
+    position: absolute;
+    z-index: 1;
 }
 
+.available {
+    background: radial-gradient(#ffffff66, #01a3a488);
+    width: calc($case-side - 2*10px);
+    height: calc($case-side - 2*10px);
+}
+
+.checked {
+    background: radial-gradient(#ffffff66, #e6646588);
+    width: calc($case-side - 2*3px);
+    height: calc($case-side - 2*3px);
+}
+
+.mated {
+    background: radial-gradient(#ffffff66, #8e44ad88);
+    width: calc($case-side - 2*3px);
+    height: calc($case-side - 2*3px);
+}
+
+.piece{
+    z-index: 2;
+}
 // .attacked {
 //     background-color: green
 // }

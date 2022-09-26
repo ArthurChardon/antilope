@@ -1,6 +1,7 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { CasesService } from './cases.service';
 import { Piece } from './piece/piece';
+import { faBook, faSkull } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-chess',
@@ -16,6 +17,9 @@ export class ChessComponent implements OnInit{
 
   whiteCheck = 'none';
   blackCheck = 'none';
+
+  faBookIcon = faBook;
+  faSkullIcon = faSkull;
 
   winner: 'black' | 'white' | 'pat' | 'none' = 'none';//'none';
   gg = {'black': 'Black won !', 'white': 'White won !', 'pat': "Draw by stalemate", 'none': ''};

@@ -17,6 +17,7 @@ import { CasesService } from './chess/cases.service';
 import { ChessComponent } from './chess/chess.component';
 import { TempComponent } from './temp/temp.component';
 import { NiceCardComponent } from './nice-card/nice-card.component';
+import { AccueilComponent } from './accueil/accueil.component';
 
 
 @NgModule({
@@ -27,7 +28,8 @@ import { NiceCardComponent } from './nice-card/nice-card.component';
     PieceComponent,
     ChessComponent,
     TempComponent,
-    NiceCardComponent
+    NiceCardComponent,
+    AccueilComponent
   ],
   imports: [
     AppRoutingModule,
