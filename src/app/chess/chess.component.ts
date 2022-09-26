@@ -2,11 +2,37 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { CasesService } from './cases.service';
 import { Piece } from './piece/piece';
 import { faBook, faSkull } from '@fortawesome/free-solid-svg-icons';
+import {
+  trigger,
+  state,
+  style,
+  animate,
+  transition,
+  // ...
+} from '@angular/animations';
+import { timer } from 'rxjs';
+
 
 @Component({
   selector: 'app-chess',
+  animations: [
+    trigger('showup', [
+      state('state1', style({
+        transform: 'translateY(-1500px)'
+      })),
+      state('state2', style({
+        transform: 'translateY(0)'
+      })),
+      transition('state1 => state2', [
+        animate('1s ease-out')
+      ]),
+      transition('state2 => state1', [
+        animate('0.5s')
+      ]),
+    ]),
+  ],
   templateUrl: './chess.component.html',
-  styleUrls: ['./chess.component.scss']
+  styleUrls: ['./chess.component.scss'],
 })
 
 export class ChessComponent implements OnInit{
@@ -14,6 +40,8 @@ export class ChessComponent implements OnInit{
   moves : string[] = [];
   blackCaptured: Piece[] = [];
   whiteCaptured: Piece[] = [];
+
+  state = 'state1';
 
   whiteCheck = 'none';
   blackCheck = 'none';
@@ -59,10 +87,11 @@ export class ChessComponent implements OnInit{
     this.casesService._ggEnd.subscribe((winner) => {
       this.endGame(winner);
     })
+    const source = timer(100);
+    const subscribe = source.subscribe(val => this.state = 'state2');
   }
 
   endGame(winner: 'black' | 'white' | 'pat' | 'none') {
-    console.log(winner);
     this.winner = winner;
   }
 

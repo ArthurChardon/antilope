@@ -233,7 +233,6 @@ export class CasesService {
             }
 
             case 'prom' : { // convert a pawn
-              console.log('convert', pos1);
               this._promotePawn.next(pos1);
               this.nbPromote = pos2;
               this.nbPromoteFrom = pos1;
@@ -389,7 +388,6 @@ export class CasesService {
     
 
     if(!checkMateEndGame && (this.whiteCheck || this.blackCheck)) {
-      console.log('check');
       newMove = newMove + '+';
     }
 
