@@ -1,6 +1,6 @@
 <div class="page-container">
     <div class="side-container">
-        <mat-card class="game-infos left-infos" [@showup]="state">
+        <mat-card class="game-infos left-infos">
             <div class="left-infos-title">
                 <fa-icon class="side-icon" [icon]="faBookIcon" size="3x"></fa-icon>
                 <span class="left-infos-title-text">Moves</span>
@@ -10,7 +10,7 @@
             </div>
         </mat-card>
     </div>
-    <mat-card class="game-infos board-card" [@showup]="state">
+    <mat-card class="game-infos board-card">
         <div class="board-container">
             <app-board></app-board>
             <div *ngIf="winner!='none'" class="win-display">{{gg[winner]}}</div>
@@ -19,8 +19,9 @@
         </div>
     </mat-card>
     <div class="side-container">
-        <mat-card class="game-infos right-infos" [@showup]="state">
-            <div class="left-infos-title">
+        <!-- <mat-card class="game-infos right-infos" [@showup]="state"> -->
+        <mat-card class="game-infos right-infos">
+                <div class="left-infos-title">
                 <fa-icon class="side-icon" [icon]="faSkullIcon" size="3x"></fa-icon>
                 <span class="left-infos-title-text">Captured</span>
             </div>

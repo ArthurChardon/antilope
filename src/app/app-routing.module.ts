@@ -6,11 +6,10 @@ import { TempComponent } from './temp/temp.component';
 
 const routes: Routes = [
   { path: '', component: AccueilComponent },
-  { path: 'chess', component: ChessComponent },
-  { path: 'temp', component: TempComponent },
-];; // sets up routes constant where you define your routes
+  { path: 'chess', component: ChessComponent, data: {animation: 'isRight'} },
+  { path: 'temp', component: TempComponent, data: {animation: 'isLeft'}  },
+];
 
-// configures NgModule imports and exports
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
