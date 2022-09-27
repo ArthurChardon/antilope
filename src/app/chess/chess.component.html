@@ -1,16 +1,12 @@
 <div class="page-container">
-    <div class="side-container">
-        <mat-card class="game-infos left-infos">
-            <div class="left-infos-title">
-                <fa-icon class="side-icon" [icon]="faBookIcon" size="3x"></fa-icon>
-                <span class="left-infos-title-text">Moves</span>
-            </div>
-            <div>
-                <span class="moves-text" *ngFor="let move of moves">{{move}} </span>
-            </div>
-        </mat-card>
+    <div class="left-container">
+        <a routerLink="/">
+            <button mat-fab color="primary">
+                <mat-icon>home</mat-icon>
+            </button>
+        </a>
     </div>
-    <mat-card class="game-infos board-card">
+    <mat-card class="board-card">
         <div class="board-container">
             <app-board></app-board>
             <div *ngIf="winner!='none'" class="win-display">{{gg[winner]}}</div>
@@ -18,22 +14,36 @@
             <span *ngIf="blackCheck!='none'">{{blackCheck}} check !</span> -->
         </div>
     </mat-card>
-    <div class="side-container">
+    <div class="right-container">
         <!-- <mat-card class="game-infos right-infos" [@showup]="state"> -->
         <mat-card class="game-infos right-infos">
-                <div class="left-infos-title">
-                <fa-icon class="side-icon" [icon]="faSkullIcon" size="3x"></fa-icon>
-                <span class="left-infos-title-text">Captured</span>
-            </div>
-            <div class="captured-both">
-                <div class="captured-container">
-                    <app-piece *ngFor="let piece of whiteCaptured" [piece]="piece" size="small"></app-piece>
+            <div class="captured-infos">
+                <div class="right-infos-title">
+                    <fa-icon class="side-icon" [icon]="faSkullIcon" size="3x"></fa-icon>
+                    <span class="right-infos-title-text">Captured</span>
                 </div>
-                <div class="captured-container">
-                    <app-piece *ngFor="let piece of blackCaptured" [piece]="piece" size="small"></app-piece>
+                <div class="captured-both">
+                    <div class="captured-container">
+                        <app-piece *ngFor="let piece of whiteCaptured" [piece]="piece" size="small"></app-piece>
+                    </div>
+                    <div class="captured-container">
+                        <app-piece *ngFor="let piece of blackCaptured" [piece]="piece" size="small"></app-piece>
+                    </div>
+                </div>
+            </div>
+            <div class="moves-infos">
+                <div class="right-infos-title moves-title">
+                    <fa-icon class="side-icon" [icon]="faBookIcon" size="3x"></fa-icon>
+                    <span class="right-infos-title-text">Moves</span>
+                </div>
+                <div>
+                    <span class="moves-text" *ngFor="let move of moves">{{move}} </span>
                 </div>
             </div>
         </mat-card>
     </div>
 </div>
+<button mat-fab color="primary">
+    <mat-icon>home</mat-icon>
+</button>
 

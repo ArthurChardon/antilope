@@ -40,8 +40,8 @@ div {
 
 .available {
     background: radial-gradient(#ffffff66, #01a3a488);
-    width: calc($case-side - 2*10px);
-    height: calc($case-side - 2*10px);
+    width: calc($case-side/2);
+    height: calc($case-side/2);
 }
 
 .checked {

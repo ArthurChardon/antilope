@@ -12,6 +12,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 
 import { CasesService } from './chess/cases.service';
 import { ChessComponent } from './chess/chess.component';
@@ -39,6 +40,7 @@ import { AccueilComponent } from './accueil/accueil.component';
     MatCardModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    MatIconModule,
   ],
   providers: [CasesService],
   bootstrap: [AppComponent]
