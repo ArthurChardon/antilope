@@ -8,6 +8,7 @@ export const fader = trigger('routeAnimations', [
                 position: 'absolute',
                 left: 0,
                 width: '100%',
+                height: '100%',
                 opacity: 0,
                 transfom: 'scale(0) translateY(100%)',
             })
