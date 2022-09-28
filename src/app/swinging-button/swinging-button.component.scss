@@ -1,0 +1,33 @@
+.trait-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    transform-origin: top center; 
+    animation-name: swing; 
+    animation-duration: 2s; 
+    animation-fill-mode: both; 
+
+    .trait {
+      top: -25px;
+      height: 250px;
+      width: 0px;
+      border: 1px solid black;
+    }
+
+    .icon {
+      color: black;
+    }
+  }
+
+  
+@keyframes swing { 
+    15% { transform: rotate(-15deg); } 
+    30% { transform: rotate(10deg); } 
+    45% { transform: rotate(-5deg); } 
+    60% { transform: rotate(5deg); } 
+    75% { transform: rotate(-2.5deg); } 
+    90% { transform: rotate(1deg); } 
+    100% { transform: rotate(0deg); } 
+} 
+  

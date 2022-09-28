@@ -1,7 +1,7 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { CasesService } from './cases.service';
 import { Piece } from './piece/piece';
-import { faBook, faSkull } from '@fortawesome/free-solid-svg-icons';
+import { faBook, faSkull, faHouse } from '@fortawesome/free-solid-svg-icons';
 import {
   trigger,
   state,
@@ -46,8 +46,7 @@ export class ChessComponent implements OnInit{
   whiteCheck = 'none';
   blackCheck = 'none';
 
-  faBookIcon = faBook;
-  faSkullIcon = faSkull;
+  faBookIcon = faBook; faSkullIcon = faSkull; faHouseIcon = faHouse;
 
   winner: 'black' | 'white' | 'pat' | 'none' = 'none';//'none';
   gg = {'black': 'Black won !', 'white': 'White won !', 'pat': "Draw by stalemate", 'none': ''};

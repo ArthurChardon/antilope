@@ -49,7 +49,7 @@ $antilope-theme: mat.define-light-theme((
     display: flex;
     flex-direction: column;
     align-items: center;
-}
+  }
 }
 
 .win-display {
@@ -93,6 +93,28 @@ $antilope-theme: mat.define-light-theme((
   width: 15%;
   display: flex;
   justify-content: center;
+
+  .trait-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    transform-origin: top center; 
+    animation-name: swing; 
+    animation-duration: 2s; 
+    animation-fill-mode: both; 
+
+    .trait {
+      top: -25px;
+      height: 250px;
+      width: 0px;
+      border: 1px solid black;
+    }
+
+    .home-icon {
+      color: black;
+    }
+  }
 }
 
 .right-container {

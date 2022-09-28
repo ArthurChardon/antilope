@@ -5,3 +5,4 @@
 - notation pièce capturée
 - navigation entre pages unifiée (bouton home etc)
 - changement de page, moves & captured disparaissent (corrigé en appelant le service pour récup la data)
+- déployer sur github pages

@@ -19,6 +19,7 @@ import { ChessComponent } from './chess/chess.component';
 import { TempComponent } from './temp/temp.component';
 import { NiceCardComponent } from './nice-card/nice-card.component';
 import { AccueilComponent } from './accueil/accueil.component';
+import { SwingingButtonComponent } from './swinging-button/swinging-button.component';
 
 
 @NgModule({
@@ -30,7 +31,8 @@ import { AccueilComponent } from './accueil/accueil.component';
     ChessComponent,
     TempComponent,
     NiceCardComponent,
-    AccueilComponent
+    AccueilComponent,
+    SwingingButtonComponent
   ],
   imports: [
     AppRoutingModule,
