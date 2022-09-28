@@ -4,8 +4,10 @@
     align-items: center;
 
     transform-origin: top center; 
-    animation-name: swing; 
-    animation-duration: 2s; 
+    animation-name: swing;
+
+    --animation-time: inherit; 
+    animation-duration: var(--animation-time); 
     animation-fill-mode: both; 
 
     .trait {
@@ -30,4 +32,17 @@
     90% { transform: rotate(1deg); } 
     100% { transform: rotate(0deg); } 
 } 
-  
+
+:host{
+    --angle-max: 20; 
+}
+
+@keyframes swingRandom {
+    15% { transform: rotate(calc(var(--angle-max) * -1)+deg); } 
+    30% { transform: rotate(calc(var(--angle-max)*2/3)+deg); } 
+    45% { transform: rotate(calc(var(--angle-max)/3 * -1)+deg); } 
+    60% { transform: rotate(calc(var(--angle-max)/3)+deg); } 
+    75% { transform: rotate(calc(var(--angle-max)/6 * -1)+deg); } 
+    90% { transform: rotate(1deg); } 
+    100% { transform: rotate(0deg); } 
+}
