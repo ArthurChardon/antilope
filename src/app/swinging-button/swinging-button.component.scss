@@ -10,11 +10,26 @@
     animation-duration: var(--animation-time); 
     animation-fill-mode: both; 
 
+    position: relative;
+
     .trait {
-      top: -25px;
       height: 250px;
       width: 0px;
-      border: 1px solid black;
+      border: 1px dotted black;
+
+      &.randomLength {
+        --length-cable: inherit;
+        height: var(--length-cable);
+      }
+    }
+
+    a {
+        position: absolute;
+        top: 100%;
+    }
+
+    .shortIcon {
+        top: 95%;
     }
 
     .icon {

@@ -2,16 +2,26 @@
     <div class="left-container">
         <app-swinging-button icon="house" route="/"></app-swinging-button>
     </div>
-    <mat-card class="board-card">
-        <div class="board-container">
-            <app-board></app-board>
-            <div *ngIf="winner!='none'" class="win-display">{{gg[winner]}}</div>
-            <!-- <span *ngIf="whiteCheck!='none'">{{whiteCheck}} check !</span>
-            <span *ngIf="blackCheck!='none'">{{blackCheck}} check !</span> -->
+    <div class="middle-container">
+        <div class="traits">
+            <div class="short-trait"></div>
+            <div class="short-trait"></div>
         </div>
-    </mat-card>
+        <mat-card class="board-card">
+            <div class="board-container">
+                <app-board></app-board>
+                <div *ngIf="winner!='none'" class="win-display">{{gg[winner]}}</div>
+                <!-- <span *ngIf="whiteCheck!='none'">{{whiteCheck}} check !</span>
+                <span *ngIf="blackCheck!='none'">{{blackCheck}} check !</span> -->
+            </div>
+        </mat-card>
+    </div>
     <div class="right-container">
         <!-- <mat-card class="game-infos right-infos" [@showup]="state"> -->
+        <div class="traits">
+            <div class="short-trait"></div>
+            <div class="short-trait"></div>
+        </div>
         <mat-card class="game-infos right-infos">
             <div class="captured-infos">
                 <div class="right-infos-title">

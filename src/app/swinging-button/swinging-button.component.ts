@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, HostBinding } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser'
-import { faBook, faSkull, faHouse } from '@fortawesome/free-solid-svg-icons';
+import { faBook, faSkull, faHouse, faChessPawn } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-swinging-button',
@@ -10,7 +10,7 @@ import { faBook, faSkull, faHouse } from '@fortawesome/free-solid-svg-icons';
 export class SwingingButtonComponent implements OnInit {
   @HostBinding("attr.style")
   public get valueAsStyle(): any {
-    return this.sanitizer.bypassSecurityTrustStyle(`--animation-time: ${this.duration}ms; --angle-max: ${this.angle}`);
+    return this.sanitizer.bypassSecurityTrustStyle(`--animation-time: ${this.duration}ms; --angle-max: ${this.angle};  --length-cable: ${this.cableLength}px`);
   }
 
   @Input() icon = 'house';
@@ -18,10 +18,11 @@ export class SwingingButtonComponent implements OnInit {
   @Input() length: 'large' | 'medium' | 'small' | 'random' = 'medium';
   @Input() route = '/';
 
-  faBookIcon = faBook; faSkullIcon = faSkull; faHouseIcon = faHouse;
   faIcon = faHouse;
+  shortIcon = false;
 
   duration = 2000;
+  cableLength = 250;
   angle = 20;
 
   constructor(private sanitizer: DomSanitizer) { }
@@ -37,6 +38,10 @@ export class SwingingButtonComponent implements OnInit {
       case 'book':
         this.faIcon = faBook;
         break;  
+      case 'pawn':
+        this.faIcon = faChessPawn;
+        this.shortIcon = true;
+        break;
         
       default:
         this.faIcon = faHouse;
@@ -45,6 +50,7 @@ export class SwingingButtonComponent implements OnInit {
 
     this.duration = this.getRandomIntFromInterval(1200, 2200);
     this.angle = this.getRandomIntFromInterval(15, 25);
+    this.cableLength = this.getRandomIntFromInterval(200, 275);
   }
 
   getRandomInt(max: number) {

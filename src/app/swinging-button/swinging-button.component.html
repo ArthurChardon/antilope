@@ -1,7 +1,7 @@
 <div class="trait-button">
-    <div class="trait">
+    <div class="trait" [ngClass]="{randomLength: length === 'random'}">
     </div>
-    <a [routerLink]="route">
+    <a [routerLink]="route"  [ngClass]="{shortIcon: shortIcon}">
         <fa-icon class="icon" [icon]="faIcon" size="3x"></fa-icon>
     </a>
 </div>
