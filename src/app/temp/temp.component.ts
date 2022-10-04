@@ -10,7 +10,7 @@ import {
 } from '@angular/animations';
 
 import { colorNames } from './colorNames'
-import { searchEngines, browsers } from './marketShares'
+import { searchEngines, browsers, example } from './marketShares'
 
 @Component({
   selector: 'app-temp',
@@ -48,7 +48,9 @@ export class TempComponent implements OnInit {
   maxWidth = 0;
   maxLength = 10;
 
-  data = browsers.get('france');
+  marketSharesData: Map<string, [string, number][]> = new Map();
+  data: [string, number][] | undefined = [];
+
 
   data3: [string, number][] = [
     ['Netflix', 0.82],
@@ -64,16 +66,19 @@ export class TempComponent implements OnInit {
     ['Others', 0.21]
   ];
 
-  fontSizeData: [string, number][] = [];
-  colorToMove = 'white';
+  refinedData: [string, number, number, string][] = [];
+  worldSelected = true;
+
+
 
 
   constructor(private sanitizer: DomSanitizer) { 
+    this.marketSharesData = searchEngines;
+    this.data = this.marketSharesData.get('world');
     this.getScreenSize();
   }
 
   ngOnInit(): void {
-    
   }
   
   @HostListener('window:resize', ['$event'])
@@ -85,13 +90,13 @@ export class TempComponent implements OnInit {
     this.maxArea = this.maxFontSize * this.maxLength * this.screenHeight;
 
     var fontSize = 1;
-    this.fontSizeData = [];
+    this.refinedData = [];
 
     if(this.data) {
       for (var element of this.data) {
         var area = Math.floor(this.maxArea * element[1]);
         fontSize = Math.sqrt(area/(2*element[0].length));
-        this.fontSizeData.push([element[0], fontSize]);
+        this.refinedData.push([element[0], fontSize, Math.sqrt(area)* 2/3, this.getColorFromName(element[0])]);
       }
     }
   }
@@ -99,7 +104,26 @@ export class TempComponent implements OnInit {
   getColorFromName(name: string) {
     var color = colorNames.get(name);
     if(!color) {
-      color = `rgb(${this.getRandomInt(255)}, ${this.getRandomInt(255)}, ${this.getRandomInt(255)})`;
+      switch(this.getRandomInt(5)) {
+        case 1:
+          color = '#511378';
+          break;  
+        case 2:
+          color = '#8a7967';
+          break; 
+        case 3:
+          color = '#7ac143';
+          break; 
+        case 4:
+          color = '#efdf00';
+          break; 
+        case 5:
+          color = '#da1884';
+          break; 
+        default:
+          color = '#ffffff';
+          break;
+      }
     }
     return color;
   }
@@ -114,12 +138,9 @@ export class TempComponent implements OnInit {
   }
 
   clique() {
-    if(this.colorToMove === 'white') {
-      this.colorToMove = 'black';
-    }
-    else if(this.colorToMove === 'black') {
-      this.colorToMove = 'white';
-    }
+    this.worldSelected = !this.worldSelected;
+    this.data = this.worldSelected ?  this.marketSharesData.get('world') : this.marketSharesData.get('france');
+    this.getScreenSize();
   }
 
 }

@@ -45,3 +45,46 @@ export const browsers = new Map<string, [string, number][]>([
         ]
     ],
 ]);
+
+// https://gs.statcounter.com/os-market-share
+export const os = new Map<string, [string, number][]>([
+    ['world', 
+        [
+            ['Windows', 0.7499],
+            ['Safari', 0.1484],
+            ['Unknown', 0.0494],
+            ['Linux', 0.0281],
+            ['Chrome OS', 0.0241],
+            ['FreeBSD', 0.001]
+        ]
+    ],
+    ['france', 
+        [
+            ['Windows', 0.7416],
+            ['Safari', 0.198],
+            ['Unknown', 0.0285],
+            ['Linux', 0.0229],
+            ['Chrome OS', 0.0087],
+            ['FreeBSD', 0.001]
+        ]
+    ],
+]);
+
+export const example = new Map<string, [string, number][]>([
+    ['world', 
+        [
+            ['Netflix', 0.42],
+            ['Twitch', 0.13],
+            ['YouTube', 0.24],
+            ['Others', 0.21]
+        ]
+    ],
+    ['france', 
+        [
+            ['Netflix', 0.25],
+            ['Twitch', 0.25],
+            ['YouTube', 0.25],
+            ['Others', 0.25]
+        ]
+    ],
+]);

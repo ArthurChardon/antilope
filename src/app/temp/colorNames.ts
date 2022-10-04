@@ -9,7 +9,7 @@ export const colorNames =  new Map<string, string>([
     ['GCP', '#4285f4'],
     ['Microsoft', '#7cbb00'],
     ['Windows', '#0078d7'],
-    ['Samsung', '#1428a0'],
+    ['Samsung', '#0689d8'],
     ['WhatsApp', '#075e54'],
     ['Facebook', '#1877f2'],
     ['Twitter', '#1da1f2'],
@@ -22,10 +22,12 @@ export const colorNames =  new Map<string, string>([
     ['YANDEX', '#ffcc00'],
     ['Baidu', '#de0f17'],
     ['Chrome', '#ea4335'],
+    ['Chrome OS', '#ea4335'],
     ['Safari', '#555555'],
+    ['OS X', '#555555'],
     ['Edge', '#00a1f1'],
     ['Firefox', '#e66000'],
-    ['Samsung Internet', '#1428a0'],
+    ['Samsung Internet', '#0689d8'],
     ['Opera', '#cc0f16'],
 
 ]);

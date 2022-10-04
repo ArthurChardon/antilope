@@ -1,28 +1,15 @@
 <div class="body">
+    <app-swinging-button icon="house" route="/" length="random"></app-swinging-button>
     <div class="toggleRegion">
-        <div class="color-to-move flip-vertical-right" [ngClass]="{'whiteMove' : colorToMove==='white', 'blackMove' : colorToMove==='black'}" (click)="clique()"></div>
-
-        <!-- <mat-button-toggle-group name="fontStyle" aria-label="Font Style" appearance="legacy" value="world">
-            <mat-button-toggle value="france">
-                <mat-icon class="iconFrance">
-                    <svg id="Layer_1" x="0px" y="0px"
-                        viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;">
-                        <circle style="fill:#F0F0F0;" cx="256" cy="256" r="256"/>
-                        <path style="fill:#D80027;" d="M512,256c0-110.071-69.472-203.906-166.957-240.077v480.155C442.528,459.906,512,366.071,512,256z"/>
-                        <path style="fill:#0052B4;" d="M0,256c0,110.071,69.473,203.906,166.957,240.077V15.923C69.473,52.094,0,145.929,0,256z"/>
-                    </svg>
-                </mat-icon>
-            </mat-button-toggle>
-            <mat-button-toggle value="world">
-                <mat-icon>public</mat-icon>
-            </mat-button-toggle>
-          </mat-button-toggle-group> -->
+        <div class="region flip-vertical-right" [ngClass]="{'worldSel' : worldSelected, 'franceSel' : !worldSelected}" (click)="clique()"></div>
     </div>       
     <div class="allData">
-        <div class="oneData" *ngFor="let element of fontSizeData" [ngStyle]="{'font-size':element[1]+'px',
-                                                                            'color':getColorFromName(element[0]),
-                                                                            'border-color':getColorFromName(element[0])+'22'}">
+        <div class="oneData" *ngFor="let element of refinedData" 
+            [ngStyle]="{'font-size':element[1]+'px', 'color': element[3]}"
+            cdkDrag>
             {{element[0]}}
+            <div class="dataCircle" [ngStyle]="{'width':element[2]+'px', 'height':element[2]+'px',
+                                                'background-color': element[3]+'22'}"></div>
         </div>
     </div>
 </div>

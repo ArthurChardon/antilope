@@ -22,7 +22,7 @@ import { TempComponent } from './temp/temp.component';
 import { NiceCardComponent } from './nice-card/nice-card.component';
 import { AccueilComponent } from './accueil/accueil.component';
 import { SwingingButtonComponent } from './swinging-button/swinging-button.component';
-
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @NgModule({
   declarations: [
@@ -47,6 +47,7 @@ import { SwingingButtonComponent } from './swinging-button/swinging-button.compo
     MatIconModule,
     MatDialogModule,
     MatButtonToggleModule,
+    DragDropModule,
   ],
   providers: [CasesService],
   bootstrap: [AppComponent]
