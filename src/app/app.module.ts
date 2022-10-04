@@ -13,6 +13,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialogModule } from '@angular/material/dialog'
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 import { CasesService } from './chess/cases.service';
 import { ChessComponent } from './chess/chess.component';
@@ -43,6 +45,8 @@ import { SwingingButtonComponent } from './swinging-button/swinging-button.compo
     MatButtonModule,
     MatProgressSpinnerModule,
     MatIconModule,
+    MatDialogModule,
+    MatButtonToggleModule,
   ],
   providers: [CasesService],
   bootstrap: [AppComponent]
