@@ -10,7 +10,7 @@ import {
 } from '@angular/animations';
 
 import { colorNames } from './colorNames'
-import { searchEngines, browsers, example } from './marketShares'
+import { searchEngines, browsers, os, example } from './marketShares'
 
 @Component({
   selector: 'app-temp',
@@ -50,7 +50,7 @@ export class TempComponent implements OnInit {
 
   marketSharesData: Map<string, [string, number][]> = new Map();
   data: [string, number][] | undefined = [];
-
+  marketChoice = 'search';
 
   data3: [string, number][] = [
     ['Netflix', 0.82],
@@ -73,8 +73,6 @@ export class TempComponent implements OnInit {
 
 
   constructor(private sanitizer: DomSanitizer) { 
-    this.marketSharesData = searchEngines;
-    this.data = this.marketSharesData.get('world');
     this.getScreenSize();
   }
 
@@ -92,6 +90,8 @@ export class TempComponent implements OnInit {
     var fontSize = 1;
     this.refinedData = [];
 
+    this.reloadData();
+
     if(this.data) {
       for (var element of this.data) {
         var area = Math.floor(this.maxArea * element[1]);
@@ -99,6 +99,24 @@ export class TempComponent implements OnInit {
         this.refinedData.push([element[0], fontSize, Math.sqrt(area)* 2/3, this.getColorFromName(element[0])]);
       }
     }
+  }
+
+  reloadData() {
+    switch(this.marketChoice) {
+      case 'search':
+        this.marketSharesData = searchEngines;
+        break;
+      case 'browser':
+        this.marketSharesData = browsers;
+        break;
+      case 'os':
+        this.marketSharesData = os;
+        break;
+      default:
+        this.marketSharesData = example;
+        break;
+    }
+    this.data = this.marketSharesData.get(this.worldSelected ? 'world' : 'france');
   }
 
   getColorFromName(name: string) {

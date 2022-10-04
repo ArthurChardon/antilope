@@ -11,6 +11,12 @@
 		right: 5%;
 		top: 0;
 	}
+
+	.marketChoices {
+		position: absolute;
+		top: 40%;
+		left: 0;
+	}
 }
 
 .toggleRegion {
@@ -21,11 +27,6 @@
 	right: 0;
 	top: 5px;
 	text-align: center;
-
-	.iconFrance {
-		height: 22px;
-		width: 22px;;
-	}
 
 	mat-icon {
 		margin: 16px 8px;
