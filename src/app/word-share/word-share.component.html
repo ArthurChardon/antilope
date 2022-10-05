@@ -1,0 +1,27 @@
+<div class="body">
+    <app-swinging-button icon="house" route="/" length="random"></app-swinging-button>
+    <div class="toggleRegion">
+        <div class="region flip-vertical-right" [ngClass]="{'worldSel' : worldSelected, 'franceSel' : !worldSelected}" (click)="clique()"></div>
+    </div>   
+    <mat-button-toggle-group #group="matButtonToggleGroup" class="marketChoices" appearance="standard" [(value)]="marketChoice" (valueChange)="getScreenSize()" vertical="true">
+        <mat-button-toggle value="browser">
+            <mat-icon>web</mat-icon>
+        </mat-button-toggle>
+        <mat-button-toggle value="search">
+            <mat-icon>manage_search</mat-icon>
+        </mat-button-toggle>
+        <mat-button-toggle value="os">
+            <mat-icon>desktop_windows</mat-icon>
+        </mat-button-toggle>
+    </mat-button-toggle-group>
+      
+    <div class="allData">
+        <div class="oneData" *ngFor="let element of refinedData" 
+            [ngStyle]="{'font-size':element[1]+'px', 'color': element[3]}"
+            cdkDrag>
+            {{element[0]}}
+            <div class="dataCircle" [ngStyle]="{'width':element[2]+'px', 'height':element[2]+'px',
+                                                'background-color': element[3]+'22'}"></div>
+        </div>
+    </div>
+</div>

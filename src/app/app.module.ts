@@ -23,6 +23,7 @@ import { NiceCardComponent } from './nice-card/nice-card.component';
 import { AccueilComponent } from './accueil/accueil.component';
 import { SwingingButtonComponent } from './swinging-button/swinging-button.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { WordShareComponent } from './word-share/word-share.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,8 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     TempComponent,
     NiceCardComponent,
     AccueilComponent,
-    SwingingButtonComponent
+    SwingingButtonComponent,
+    WordShareComponent
   ],
   imports: [
     AppRoutingModule,

@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, HostBinding } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser'
-import { faBook, faSkull, faHouse, faChessPawn } from '@fortawesome/free-solid-svg-icons';
+import { faBook, faSkull, faHouse, faChessPawn, faChartSimple } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-swinging-button',
@@ -40,6 +40,11 @@ export class SwingingButtonComponent implements OnInit {
         break;  
       case 'pawn':
         this.faIcon = faChessPawn;
+        this.shortIcon = true;
+        break;
+
+      case 'chart':
+        this.faIcon = faChartSimple;
         this.shortIcon = true;
         break;
         
